@@ -1,0 +1,4 @@
+* create a separate project with Core and Utils 
+* consolidate core package from localDC and Regression branch
+* write helper function for multiple cluster and feed submission to make the test case size small
+* make delete from form finally automatic
