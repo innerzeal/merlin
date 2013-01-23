@@ -5,8 +5,10 @@
 package com.inmobi.qa.airavatqa;
 
 import com.inmobi.qa.airavatqa.core.Bundle;
+import com.inmobi.qa.airavatqa.core.ColoHelper;
 import com.inmobi.qa.airavatqa.core.ENTITY_TYPE;
 import com.inmobi.qa.airavatqa.core.EntityHelperFactory;
+import com.inmobi.qa.airavatqa.core.PrismHelper;
 import com.inmobi.qa.airavatqa.core.ServiceResponse;
 import com.inmobi.qa.airavatqa.core.Util;
 import com.inmobi.qa.airavatqa.core.Util.URLS;
@@ -24,7 +26,9 @@ import org.testng.annotations.Test;
  */
 public class FeedSuspendTest {
     
-	
+	PrismHelper prismHelper=new PrismHelper("prism.properties");
+	//ColoHelper ivoryqa1 = new ColoHelper("gs1001.config.properties");
+	ColoHelper ivoryqa1 = new ColoHelper("ivoryqa-1.config.properties");    
 	@BeforeMethod(alwaysRun=true)
 	public void testName(Method method)
 	{
@@ -39,24 +43,26 @@ public class FeedSuspendTest {
     public void submitCluster(Bundle bundle) throws Exception
     {
         //submit the cluster
-        ServiceResponse response=clusterHelper.submitEntity(URLS.SUBMIT_URL,bundle.getClusterData());
+        ServiceResponse response=prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL, bundle.getClusters().get(0));
         Assert.assertEquals(Util.parseResponse(response).getStatusCode(),200);
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
     }
     
+  
     @Test(groups={"0.1","0.2"},dataProvider="DP")
     public void suspendScheduledFeed(Bundle bundle) throws Exception
     {
         try {
         bundle.generateUniqueBundle();
+        bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
         submitCluster(bundle);
         
         String feed=Util.getInputFeedFromBundle(bundle);
         
-        ServiceResponse response=dataHelper.submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL,feed);
+        ServiceResponse response=prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL,feed);
         Util.assertSucceeded(response);
         
-        response=dataHelper.suspend(URLS.SUSPEND_URL, feed);
+        response=prismHelper.getFeedHelper().suspend(URLS.SUSPEND_URL, feed);
         
         Util.assertSucceeded(response);
         
@@ -69,7 +75,7 @@ public class FeedSuspendTest {
         }
         finally {
             
-            dataHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
         }
     }
     
@@ -78,19 +84,20 @@ public class FeedSuspendTest {
     {
         try {
         bundle.generateUniqueBundle();
+        bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
         submitCluster(bundle);
         
         String feed=Util.getInputFeedFromBundle(bundle);
         
-        ServiceResponse response=dataHelper.submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed);
+        ServiceResponse response=prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed);
         Util.assertSucceeded(response);
         
-        response=dataHelper.suspend(URLS.SUSPEND_URL, feed);
+        response=prismHelper.getFeedHelper().suspend(URLS.SUSPEND_URL, feed);
         Util.assertSucceeded(response);
         
         Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED").get(0).contains("SUSPENDED"));
         
-        response=dataHelper.suspend(URLS.SUSPEND_URL, feed);
+        response=prismHelper.getFeedHelper().suspend(URLS.SUSPEND_URL, feed);
         
         Util.assertSucceeded(response);
         
@@ -104,7 +111,7 @@ public class FeedSuspendTest {
         }
         finally {
             
-            dataHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
         }
     }
     
@@ -113,17 +120,18 @@ public class FeedSuspendTest {
     {
         try {
         bundle.generateUniqueBundle();
+        bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
         submitCluster(bundle);
         
         String feed=Util.getInputFeedFromBundle(bundle);
         
-        ServiceResponse response=dataHelper.submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed);
+        ServiceResponse response=prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed);
         Util.assertSucceeded(response);
         
-        response=dataHelper.delete(URLS.DELETE_URL, feed);
+        response=prismHelper.getFeedHelper().delete(URLS.DELETE_URL, feed);
         Util.assertSucceeded(response);
         
-        response=dataHelper.suspend(URLS.SUSPEND_URL, feed);
+        response=prismHelper.getFeedHelper().suspend(URLS.SUSPEND_URL, feed);
         Util.assertFailed(response);
         }
                 catch(Exception e)
@@ -133,7 +141,7 @@ public class FeedSuspendTest {
         }
         finally {
             
-            dataHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
         }
     }
     
@@ -145,7 +153,7 @@ public class FeedSuspendTest {
         
         String feed=Util.getInputFeedFromBundle(bundle);
         
-        ServiceResponse response=dataHelper.suspend(URLS.SCHEDULE_URL, feed);
+        ServiceResponse response=prismHelper.getFeedHelper().suspend(URLS.SCHEDULE_URL, feed);
         
         Util.assertFailed(response);
         
@@ -156,14 +164,15 @@ public class FeedSuspendTest {
     {
         try {
         bundle.generateUniqueBundle();
+        bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
         submitCluster(bundle);
         
         String feed=Util.getInputFeedFromBundle(bundle);
         
-        ServiceResponse response=dataHelper.submitEntity(URLS.SUBMIT_URL, feed);
+        ServiceResponse response=prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
         Util.assertSucceeded(response);
         
-        response=dataHelper.suspend(URLS.SUSPEND_URL, feed);
+        response=prismHelper.getFeedHelper().suspend(URLS.SUSPEND_URL, feed);
         Util.assertFailed(response);
         }
                 catch(Exception e)
@@ -173,7 +182,7 @@ public class FeedSuspendTest {
         }
         finally {
             
-            dataHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
         }
     }
     
@@ -181,7 +190,7 @@ public class FeedSuspendTest {
 	public Object[][] getTestData(Method m) throws Exception
 	{
 
-		return Util.readBundles();
+		return Util.readELBundles();
 	}
     
     

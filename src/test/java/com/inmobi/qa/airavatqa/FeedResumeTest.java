@@ -5,8 +5,10 @@
 package com.inmobi.qa.airavatqa;
 
 import com.inmobi.qa.airavatqa.core.Bundle;
+import com.inmobi.qa.airavatqa.core.ColoHelper;
 import com.inmobi.qa.airavatqa.core.ENTITY_TYPE;
 import com.inmobi.qa.airavatqa.core.EntityHelperFactory;
+import com.inmobi.qa.airavatqa.core.PrismHelper;
 import com.inmobi.qa.airavatqa.core.ServiceResponse;
 import com.inmobi.qa.airavatqa.core.Util;
 import com.inmobi.qa.airavatqa.core.Util.URLS;
@@ -24,6 +26,8 @@ import org.testng.annotations.Test;
  */
 public class FeedResumeTest {
 	
+	PrismHelper prismHelper=new PrismHelper("prism.properties");
+	ColoHelper ivoryqa1 = new ColoHelper("ivoryqa-1.config.properties");
 	@BeforeMethod(alwaysRun=true)
 	public void testName(Method method)
 	{
@@ -33,36 +37,44 @@ public class FeedResumeTest {
     
       IEntityManagerHelper feedHelper=EntityHelperFactory.getEntityHelper(ENTITY_TYPE.DATA);
       IEntityManagerHelper clusterHelper=EntityHelperFactory.getEntityHelper(ENTITY_TYPE.CLUSTER);
-      
+     
     public void submitCluster(Bundle bundle) throws Exception
     {
-        //submit the cluster
-        ServiceResponse response=clusterHelper.submitEntity(URLS.SUBMIT_URL,bundle.getClusterData());
+        ServiceResponse response=prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL, bundle.getClusters().get(0));
+
         Assert.assertEquals(Util.parseResponse(response).getStatusCode(),200);
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
     }
     
-    @Test(groups={"0.1","0.2"},dataProvider="DP")
+ 
+   @Test(groups={"0.1","0.2"},dataProvider="DP")
     public void resumeSuspendedFeed(Bundle bundle) throws Exception
     {
+    	    
         try {
            bundle.generateUniqueBundle();
+        
+           bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
            submitCluster(bundle);
            String feed=Util.getInputFeedFromBundle(bundle);
+           
+           Util.assertSucceeded(prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed));
+           Util.assertSucceeded(prismHelper.getFeedHelper().suspend(URLS.SUSPEND_URL, feed));
 
-           Util.assertSucceeded(feedHelper.submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed));
+           
+          Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED").get(0).contains("SUSPENDED"));
+           
+                                  
+           
+           Util.assertSucceeded(prismHelper.getFeedHelper().resume(URLS.RESUME_URL, feed));
 
-           Util.assertSucceeded(feedHelper.suspend(URLS.SUSPEND_URL, feed));
+           ServiceResponse response=prismHelper.getFeedHelper().getStatus(URLS.STATUS_URL, feed);
 
-           Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED").get(0).contains("SUSPENDED"));
-
-           Util.assertSucceeded(feedHelper.resume(URLS.RESUME_URL, feed));
-
-           ServiceResponse response=feedHelper.getStatus(URLS.STATUS_URL, feed);
-
-           Assert.assertEquals(response.getMessage(),"RUNNING");
+           String colo=prismHelper.getFeedHelper().getColo();
+           Assert.assertTrue(response.getMessage().contains(colo+"/RUNNING"));
 
            Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"RUNNING").get(0).contains("RUNNING"));
+           
         }
         catch(Exception e)
         {
@@ -70,11 +82,12 @@ public class FeedResumeTest {
             throw new TestNGException(e.getMessage());
         }
         finally {
-            
-            feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
-        }
+            prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+          }
     }
-        
+ 
+
+
     @Test(groups={"0.1","0.2"},dataProvider="DP")
     public void resumeNonExistentFeed(Bundle bundle) throws Exception
     {
@@ -84,7 +97,7 @@ public class FeedResumeTest {
            String feed=Util.getInputFeedFromBundle(bundle);
 
            
-           Util.assertFailed(feedHelper.resume(URLS.RESUME_URL, feed));
+           Util.assertFailed(prismHelper.getFeedHelper().resume(URLS.RESUME_URL, feed));
 
  
         }
@@ -95,7 +108,8 @@ public class FeedResumeTest {
         }
   
     }
-    
+  
+
     @Test(groups={"0.1","0.2"},dataProvider="DP")
     public void resumeDeletedFeed(Bundle bundle) throws Exception
     {
@@ -104,12 +118,13 @@ public class FeedResumeTest {
            submitCluster(bundle);
            String feed=Util.getInputFeedFromBundle(bundle);
 
-           Util.assertSucceeded(feedHelper.submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed));
+           Util.assertSucceeded(prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed));
 
-           Util.assertSucceeded(feedHelper.delete(URLS.DELETE_URL, feed));
+           Util.assertSucceeded(prismHelper.getFeedHelper().delete(URLS.DELETE_URL, feed));
 
-           Util.assertFailed(feedHelper.resume(URLS.RESUME_URL, feed));
+           Util.assertFailed(prismHelper.getFeedHelper().resume(URLS.RESUME_URL, feed));
 
+        
         }
         catch(Exception e)
         {
@@ -118,27 +133,30 @@ public class FeedResumeTest {
         }
         finally {
             
-            feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+         	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
         }
     }
+   
     
     @Test(groups={"0.1","0.2"},dataProvider="DP")
     public void resumeScheduledFeed(Bundle bundle) throws Exception
     {
         try {
            bundle.generateUniqueBundle();
+           bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
            submitCluster(bundle);
            String feed=Util.getInputFeedFromBundle(bundle);
 
-           Util.assertSucceeded(feedHelper.submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed));
+           Util.assertSucceeded(prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed));
 
            Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"RUNNING").get(0).contains("RUNNING"));
 
-           Util.assertFailed(feedHelper.resume(URLS.RESUME_URL, feed));
+           Util.assertSucceeded(prismHelper.getFeedHelper().resume(URLS.RESUME_URL, feed));
            
-           ServiceResponse response=feedHelper.getStatus(URLS.STATUS_URL, feed);
-           Assert.assertEquals(response.getMessage(),"RUNNING");
            
+           ServiceResponse response=prismHelper.getFeedHelper().getStatus(URLS.STATUS_URL, feed);
+           String colo=prismHelper.getFeedHelper().getColo();
+           Assert.assertTrue(response.getMessage().contains(colo+"/RUNNING"));
            Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"RUNNING").get(0).contains("RUNNING"));
  
         }
@@ -149,16 +167,16 @@ public class FeedResumeTest {
         }
         finally {
             
-            feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+           
         }
     }
+
     
-    
-     @DataProvider(name="DP")
+    @DataProvider(name="DP")
     public Object[][] getData(Method m) throws Exception
     {
-        return Util.readBundles();
+        return Util.readELBundles();
     }   
-    
-    
+   
 }

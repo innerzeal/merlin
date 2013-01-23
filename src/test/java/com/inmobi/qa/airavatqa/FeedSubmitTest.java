@@ -5,8 +5,10 @@
 package com.inmobi.qa.airavatqa;
 
 import com.inmobi.qa.airavatqa.core.Bundle;
+import com.inmobi.qa.airavatqa.core.ColoHelper;
 import com.inmobi.qa.airavatqa.core.ENTITY_TYPE;
 import com.inmobi.qa.airavatqa.core.EntityHelperFactory;
+import com.inmobi.qa.airavatqa.core.PrismHelper;
 import com.inmobi.qa.airavatqa.core.ServiceResponse;
 import com.inmobi.qa.airavatqa.core.Util;
 import com.inmobi.qa.airavatqa.core.Util.URLS;
@@ -23,7 +25,9 @@ import org.testng.annotations.Test;
  * @author rishu.mehrotra
  */
 public class FeedSubmitTest {
-    
+	PrismHelper prismHelper=new PrismHelper("prism.properties");
+	//ColoHelper ivoryqa1 = new ColoHelper("gs1001.config.properties");
+	ColoHelper ivoryqa1 = new ColoHelper("ivoryqa-1.config.properties");        
 	
 	@BeforeMethod(alwaysRun=true)
 	public void testName(Method method)
@@ -38,7 +42,8 @@ public class FeedSubmitTest {
     public void submitCluster(Bundle bundle) throws Exception
     {
         //submit the cluster
-        ServiceResponse response=clusterHelper.submitEntity(URLS.SUBMIT_URL,bundle.getClusterData());
+    	ServiceResponse response=prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL, bundle.getClusters().get(0));
+
         Assert.assertEquals(Util.parseResponse(response).getStatusCode(),200);
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
     }
@@ -48,12 +53,12 @@ public class FeedSubmitTest {
     {
         try {
         bundle.generateUniqueBundle();
-        
+        bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
         submitCluster(bundle);
         //now submit an input dataset
         String feed=Util.getInputFeedFromBundle(bundle);
         
-        ServiceResponse response=feedHelper.submitEntity(URLS.SUBMIT_URL,feed);
+        ServiceResponse response=prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL,feed);
         Util.assertSucceeded(response);
         }
                 catch(Exception e)
@@ -63,28 +68,28 @@ public class FeedSubmitTest {
         }
         finally {
             
-            feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
         }
         
     }
-    
+
     @Test(groups={"0.1","0.2"},dataProvider="DP")
     public void submitValidFeedPostDeletion(Bundle bundle) throws Exception
     {
         try {
         bundle.generateUniqueBundle();
-        
+        bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
         submitCluster(bundle);
         //now submit an input dataset
         String feed=Util.getInputFeedFromBundle(bundle);
         
-        ServiceResponse response=feedHelper.submitEntity(URLS.SUBMIT_URL,feed);
+        ServiceResponse response=prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL,feed);
         Util.assertSucceeded(response);
         
-        response=feedHelper.delete(URLS.DELETE_URL, feed);
+        response=prismHelper.getFeedHelper().delete(URLS.DELETE_URL, feed);
         Util.assertSucceeded(response);
         
-        response=feedHelper.submitEntity(URLS.SUBMIT_URL, feed);
+        response=prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
         }
                 catch(Exception e)
         {
@@ -93,29 +98,30 @@ public class FeedSubmitTest {
         }
         finally {
             
-            feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
         }
         
     }
+
     
     @Test(groups={"0.1","0.2"},dataProvider="DP")
     public void submitValidFeedPostGet(Bundle bundle) throws Exception
     {
         try {
               bundle.generateUniqueBundle();
-        
+              bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
         submitCluster(bundle);
         //now submit an input dataset
         String feed=Util.getInputFeedFromBundle(bundle);
         
-        ServiceResponse response=feedHelper.submitEntity(URLS.SUBMIT_URL,feed);
+        ServiceResponse response=prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL,feed);
         Util.assertSucceeded(response);
         
-        response=feedHelper.getEntityDefinition(URLS.GET_ENTITY_DEFINITION.getValue(), feed);
+        response=prismHelper.getFeedHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION, feed);
         Util.assertSucceeded(response);
         
-        response=feedHelper.submitEntity(URLS.SUBMIT_URL, feed); 
-        Util.assertFailed(response);
+        response=prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed); 
+        Util.assertSucceeded(response);
         }
                      catch(Exception e)
         {
@@ -124,25 +130,25 @@ public class FeedSubmitTest {
         }
         finally {
             
-            feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
         }
     }
-    
+   
     @Test(groups={"0.1","0.2"},dataProvider="DP")
     public void submitValidFeedTwice(Bundle bundle) throws Exception
     {
         try {
         bundle.generateUniqueBundle();
-        
+        bundle = new Bundle(bundle,ivoryqa1.getEnvFileName()); 
         submitCluster(bundle);
         //now submit an input dataset
         String feed=Util.getInputFeedFromBundle(bundle);
         
-        ServiceResponse response=feedHelper.submitEntity(URLS.SUBMIT_URL,feed);
+        ServiceResponse response=prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL,feed);
         Util.assertSucceeded(response);
         
-        response=feedHelper.submitEntity(URLS.SUBMIT_URL, feed); 
-        Util.assertFailed(response);
+        response=prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed); 
+        Util.assertSucceeded(response);
         }
                      catch(Exception e)
         {
@@ -151,17 +157,17 @@ public class FeedSubmitTest {
         }
         finally {
             
-            feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
         }
     }
     
-    
+   
     
     
     @DataProvider(name="DP")
     public static Object[][] getData(Method m) throws Exception
     {
-        return Util.readBundles();
+        return Util.readELBundles();
     }
     
     

@@ -1,12 +1,15 @@
 /*
+
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.inmobi.qa.airavatqa;
 
 import com.inmobi.qa.airavatqa.core.Bundle;
+import com.inmobi.qa.airavatqa.core.ColoHelper;
 import com.inmobi.qa.airavatqa.core.ENTITY_TYPE;
 import com.inmobi.qa.airavatqa.core.EntityHelperFactory;
+import com.inmobi.qa.airavatqa.core.PrismHelper;
 import com.inmobi.qa.airavatqa.core.ServiceResponse;
 import com.inmobi.qa.airavatqa.core.Util;
 import com.inmobi.qa.airavatqa.core.Util.URLS;
@@ -23,7 +26,9 @@ import org.testng.annotations.Test;
  * @author rishu.mehrotra
  */
 public class FeedStatusTest {
-    
+	PrismHelper prismHelper=new PrismHelper("prism.properties");
+	//ColoHelper ivoryqa1 = new ColoHelper("gs1001.config.properties");
+	ColoHelper ivoryqa1 = new ColoHelper("ivoryqa-1.config.properties");    
 	
 	@BeforeMethod(alwaysRun=true)
 	public void testName(Method method)
@@ -37,8 +42,9 @@ public class FeedStatusTest {
       
     public void submitCluster(Bundle bundle) throws Exception
     {
-        //submit the cluster
-        ServiceResponse response=clusterHelper.submitEntity(URLS.SUBMIT_URL,bundle.getClusterData());
+        
+    	ServiceResponse response=prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL, bundle.getClusters().get(0));
+
         Assert.assertEquals(Util.parseResponse(response).getStatusCode(),200);
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
     }
@@ -50,19 +56,24 @@ public class FeedStatusTest {
     {
         try {
         bundle.generateUniqueBundle();
+        bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
         submitCluster(bundle);
         String feed=Util.getInputFeedFromBundle(bundle);
-        ServiceResponse response=feedHelper.submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL,feed);
-        
+        ServiceResponse response=prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL,feed);
+        Util.print(feed);
         Util.assertSucceeded(response);
         
-        response=feedHelper.getStatus(URLS.STATUS_URL,feed);
-        //Util.assertSucceeded(response);
+        response=prismHelper.getFeedHelper().getStatus(URLS.STATUS_URL,feed);
+        
+        Util.assertSucceeded(response);
         
         Assert.assertEquals(Util.parseResponse(response).getStatusCode(),200);
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
         
-        Assert.assertEquals(response.getMessage(),"RUNNING");
+        String colo=prismHelper.getFeedHelper().getColo();
+        Assert.assertTrue(response.getMessage().contains(colo+"/RUNNING"));
+        //Assert.assertEquals(Util.message(response.getMessage(),"message"),(colo+"/RUNNING"));
+        
         Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"RUNNING").get(0).contains("RUNNING"));
         }
         catch(Exception e)
@@ -72,31 +83,35 @@ public class FeedStatusTest {
         }
         finally {
             
-            feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+              
+      
         }
         
     }
-    
-    
+  
+
     @Test(groups={"0.1","0.2"},dataProvider="DP")
     public void getStatusForSuspendedFeed(Bundle bundle) throws Exception
     {
         try {
         bundle.generateUniqueBundle();
+        bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
         submitCluster(bundle);
         String feed=Util.getInputFeedFromBundle(bundle);
-        ServiceResponse response=feedHelper.submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL,feed);
+        ServiceResponse response=prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL,feed);
         
         Util.assertSucceeded(response);
         
-        response=feedHelper.suspend(URLS.SUSPEND_URL,feed);
+        response=prismHelper.getFeedHelper().suspend(URLS.SUSPEND_URL,feed);
         Util.assertSucceeded(response);
         
-        response=feedHelper.getStatus(URLS.STATUS_URL, feed);
+        response=prismHelper.getFeedHelper().getStatus(URLS.STATUS_URL, feed);
         
         Assert.assertEquals(Util.parseResponse(response).getStatusCode(),200);
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
-        Assert.assertEquals(response.getMessage(),"SUSPENDED");
+        String colo=prismHelper.getFeedHelper().getColo();
+        Assert.assertTrue(response.getMessage().contains(colo+"/SUSPENDED"));
         Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED").get(0).contains("SUSPENDED"));
         }
         catch(Exception e)
@@ -106,29 +121,30 @@ public class FeedStatusTest {
         }
         finally {
             
-            feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
         }
          
     }
-    
-    
+  
+  
     @Test(groups={"0.1","0.2"},dataProvider="DP")
     public void getStatusForSubmittedFeed(Bundle bundle) throws Exception
     {
         try {
         bundle.generateUniqueBundle();
+        bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
         submitCluster(bundle);
         String feed=Util.getInputFeedFromBundle(bundle);
-        ServiceResponse response=feedHelper.submitEntity(URLS.SUBMIT_URL,feed);
+        ServiceResponse response=prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL,feed);
         
         Util.assertSucceeded(response);
         
-        response=feedHelper.getStatus(URLS.STATUS_URL,feed);
+        response=prismHelper.getFeedHelper().getStatus(URLS.STATUS_URL,feed);
         
         Assert.assertEquals(Util.parseResponse(response).getStatusCode(),200);
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
-        
-        Assert.assertEquals(response.getMessage(),"SUBMITTED");
+        String colo=prismHelper.getFeedHelper().getColo();
+        Assert.assertTrue(response.getMessage().contains(colo+"/SUBMITTED"));
         //Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"RUNNING").get(0).contains("RUNNING"));
         }
         catch(Exception e)
@@ -138,31 +154,32 @@ public class FeedStatusTest {
         }
         finally {
             
-            feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
         }
         
     }
+
     
     @Test(groups={"0.1","0.2"},dataProvider="DP")
     public void getStatusForDeletedFeed(Bundle bundle) throws Exception
     {
         try {
         bundle.generateUniqueBundle();
+        bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
+
         submitCluster(bundle);
         String feed=Util.getInputFeedFromBundle(bundle);
-        ServiceResponse response=feedHelper.submitEntity(URLS.SUBMIT_URL,feed);
-        
+        ServiceResponse response=prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL,feed);
         Util.assertSucceeded(response);
         
-        response=feedHelper.delete(URLS.DELETE_URL, feed);
+        response=prismHelper.getFeedHelper().delete(URLS.DELETE_URL, feed);
         Util.assertSucceeded(response);
         
-        response=feedHelper.getStatus(URLS.STATUS_URL,feed);
-        //Util.assertSucceeded(response);
-        Assert.assertEquals(Util.parseResponse(response).getStatusCode(),200);
+        response=prismHelper.getFeedHelper().getStatus(URLS.STATUS_URL,feed);
+        Assert.assertEquals(Util.parseResponse(response).getStatusCode(),400);
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
         
-        Assert.assertEquals(response.getMessage(),"NOT_FOUND");
+        Assert.assertTrue(response.getMessage().contains(Util.getFeedName(feed)+" (FEED) not found"));
         //Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"KILLED").get(0).contains("KILLED"));
         }
         catch(Exception e)
@@ -172,10 +189,11 @@ public class FeedStatusTest {
         }
         finally {
             
-            feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        	prismHelper.getFeedHelper().delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
         }
         
     }
+
     
     @Test(groups={"0.1","0.2"},dataProvider="DP")
     public void getStatusForNonExistentFeed(Bundle bundle) throws Exception
@@ -184,20 +202,21 @@ public class FeedStatusTest {
         bundle.generateUniqueBundle();
         submitCluster(bundle);
         String feed=Util.getInputFeedFromBundle(bundle);
-        ServiceResponse response=feedHelper.getStatus(URLS.STATUS_URL, feed);
-        Assert.assertEquals(Util.parseResponse(response).getStatusCode(),200);
+        ServiceResponse response=prismHelper.getFeedHelper().getStatus(URLS.STATUS_URL, feed);
+        Assert.assertEquals(Util.parseResponse(response).getStatusCode(),400);
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
+        Assert.assertTrue(response.getMessage().contains(Util.getFeedName(feed)+" (FEED) not found"));
         
-        Assert.assertEquals(response.getMessage(),"NOT_FOUND");
-        
+        Assert.assertEquals(Util.statusMessage(response.getMessage(),"status"),"FAILED");
     }
+
    
-    
     
     
     @DataProvider(name="DP")
     public Object[][] getData(Method m) throws Exception
     {
-        return Util.readBundles();
+        return Util.readELBundles();
     }
+    
 }
