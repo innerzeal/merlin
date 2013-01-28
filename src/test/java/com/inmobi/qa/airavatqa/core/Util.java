@@ -78,6 +78,8 @@ import org.mortbay.log.Log;
 import org.testng.Assert;
 import org.testng.TestNGException;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import java.lang.*;
 import java.util.HashMap;
 import org.apache.hadoop.fs.FileStatus;
@@ -86,6 +88,16 @@ import org.apache.ivory.entity.v0.Frequency;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.testng.log4testng.Logger;
+
+// for reading from xml file
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
 /**
  *
  * @author rishu.mehrotra
@@ -945,6 +957,7 @@ public class Util {
 	public static Object[][] readBundles() throws Exception
 	{
 		final String FILEPATH="src/test/resources/bundles";
+		
 
 		List<Bundle> bundleSet=getDataFromFolder(FILEPATH);
 
@@ -1199,6 +1212,7 @@ public class Util {
 		String tempFileName="sample-"+UUID.randomUUID()+".tmp";
 		//ArrayList<String> oozieLocation=runRemoteScript(HOST_NAME,USER_NAME,PASSWORD,"which oozie");
 		final String oozieLocation=OOZIE_LOCATION+"/oozie";
+		
 		logger.info(OOZIE_LOCATION+"/oozie jobs -oozie "+OOZIE_URL+"  -jobtype bundle -localtime -filter \"status=RUNNING;name=IVORY_PROCESS_"+processName+"\" | tail -2 | head -1");
 		//ArrayList<String>jobList= runRemoteScript(HOST_NAME,USER_NAME,PASSWORD,OOZIE_LOCATION+"/oozie jobs -oozie "+OOZIE_URL+"  -jobtype coordinator -localtime -filter \"status=RUNNING;name=IVORY_PROCESS_"+processName+"\" | tail -2 | head -1");
 		String expectedState="RUNNING";
@@ -1328,10 +1342,16 @@ public class Util {
 		//return runRemoteScript(HOST_NAME,USER_NAME,PASSWORD,"oozie job -info "+jobId+" | head -5 | tail -1").get(0).split(":")[1].trim();
 		String tempFileName="sample-"+UUID.randomUUID()+".tmp";
 		//ArrayList<String> oozieLocation=runRemoteScript(HOST_NAME,USER_NAME,PASSWORD,"which oozie");
-		final String oozieLocation=OOZIE_LOCATION+"/oozie";
-
-		String statusCommand=OOZIE_LOCATION+"/oozie jobs -oozie "+OOZIE_URL+"  -jobtype bundle -localtime -filter \"";
-
+		//final String oozieLocation=OOZIE_LOCATION+"/oozie";
+		final String oozieLocation=prismHelper.getFeedHelper().getOozieLocation();
+		final String oozieurl=prismHelper.getFeedHelper().getOozieURL();
+		final String oozieHostName=prismHelper.getFeedHelper().getQaHost();
+		final String oozieUserName=prismHelper.getFeedHelper().getUsername();
+		final String ooziePwd=prismHelper.getFeedHelper().getPassword();
+	      //v String statusCommand=OOZIE_LOCATION+"/oozie jobs -oozie "+OOZIE_URL+"  -jobtype bundle -localtime -filter \"";
+		//String statusCommand="/home/rishu/oozie-3.2.2/bin/oozie jobs -oozie http://10.14.118.26:11000/oozie/ -jobtype bundle -localtime -filter \"";
+		 String statusCommand=oozieLocation+"/oozie jobs -oozie "+oozieurl+"  -jobtype bundle -localtime -filter \"";
+		
 		if(expectedState.equals("NONE"))
 		{
 			statusCommand = statusCommand ;
@@ -1349,8 +1369,10 @@ public class Util {
 
 		for(int seconds=0;seconds<20;seconds++)
 		{
-			jobList= runRemoteScript(HOST_NAME,USER_NAME,PASSWORD,statusCommand);
-
+			//jobList= runRemoteScript(HOST_NAME,USER_NAME,PASSWORD,statusCommand);
+			//jobList= runRemoteScript("10.14.118.26","rishu","Rishu@123",statusCommand);
+			jobList= runRemoteScript(oozieHostName,oozieUserName,ooziePwd,statusCommand);
+            
 			if( (expectedState!=null || expectedState.equalsIgnoreCase("NONE")) || !(expectedState.equals("") && jobList.get(0).contains(expectedState)))
 			{
 				break;
@@ -4393,4 +4415,25 @@ public class Util {
 		runRemoteScriptAsSudo(helper.getQaHost(),helper.getUsername(),helper.getPassword()," /etc/init.d/tomcat6 restart");
 		
 	}
+ 
+		public static String statusMessage(String xml,String field)throws IOException, SAXException, ParserConfigurationException
+		{
+		    String result=null;
+		    String colo = null;
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	        DocumentBuilder db = dbf.newDocumentBuilder();
+	        Document doc = db.parse(new ByteArrayInputStream(xml.getBytes("UTF-8")));
+	        doc.getDocumentElement().normalize();
+	        NodeList nList=doc.getElementsByTagName("result");
+	        Node nNode = nList.item(0);
+	        if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+	        	Element eElement = (Element) nNode;
+				result=eElement.getElementsByTagName(field).item(0).getTextContent();
+				      
+	        }	
+			return (result);
+			
+		}
 }
+		
+  
