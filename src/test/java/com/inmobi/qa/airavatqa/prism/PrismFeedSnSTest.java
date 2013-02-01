@@ -8,10 +8,17 @@ import java.lang.reflect.Method;
 
 import com.inmobi.qa.airavatqa.core.APIResult;
 import com.inmobi.qa.airavatqa.core.Bundle;
+import com.inmobi.qa.airavatqa.core.GetBundle;
 import com.inmobi.qa.airavatqa.core.PrismHelper;
 import com.inmobi.qa.airavatqa.core.ColoHelper;
+import com.inmobi.qa.airavatqa.core.ServiceResponse;
 import com.inmobi.qa.airavatqa.core.Util;
+import com.inmobi.qa.airavatqa.core.instanceUtil;
+import com.inmobi.qa.airavatqa.core.xmlUtil;
 import com.inmobi.qa.airavatqa.core.Util.URLS;
+import com.inmobi.qa.airavatqa.generated.feed.ActionType;
+import com.inmobi.qa.airavatqa.generated.feed.ClusterType;
+
 import org.testng.Assert;
 import org.testng.TestNGException;
 import org.testng.annotations.BeforeMethod;
@@ -63,7 +70,7 @@ public class PrismFeedSnSTest {
             Assert.assertEquals(Util.getOozieJobStatus(Util.readDatasetName(UA1Bundle.getDataSets().get(0)),"RUNNING",UA2ColoHelper).get(0),"No Jobs match your criteria!");
             
         }
-        
+      
         @Test(dataProvider="DP",groups={"prism","0.2"})
         public void testSnSAlreadyScheduledFeedOnBothColos(Bundle bundle) throws Exception
         {
@@ -235,7 +242,7 @@ public class PrismFeedSnSTest {
             
             Util.shutDownService(UA1ColoHelper.getFeedHelper());
             
-            Util.assertFailed(prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL,UA1Bundle.getDataSets().get(0)));
+            Util.assertSucceeded(prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL,UA1Bundle.getDataSets().get(0)));
             Assert.assertEquals(Util.getOozieJobStatus(Util.readDatasetName(UA1Bundle.getDataSets().get(0)),"RUNNING",UA2ColoHelper).get(0),"No Jobs match your criteria!");
             }
             catch(Exception e)
@@ -370,6 +377,7 @@ public class PrismFeedSnSTest {
            
         } 
         
+       
         @Test(dataProvider="DP",groups={"prism","0.2"})
         public void testScheduleDeletedFeedOnBothColosUsingColoHelper(Bundle bundle) throws Exception
         {
@@ -398,6 +406,7 @@ public class PrismFeedSnSTest {
             Assert.assertEquals(Util.parseResponse(prismHelper.getFeedHelper().getStatus(URLS.STATUS_URL,UA2Bundle.getDataSets().get(0))).getMessage(),"ua2/RUNNING");
             
         }
+       
         
         @Test(dataProvider="DP",groups={"prism","0.2"})
         public void testSNSNonExistentFeedOnBothColosUsingColoHelper(Bundle bundle) throws Exception
@@ -452,37 +461,66 @@ public class PrismFeedSnSTest {
             }
             
         }
-        
 
-        @Test(dataProvider="DP",groups={"prism","0.2"})
-        public void testFeedSnSOn1ColoWhileThatColoIsDownUsingColoHelper(Bundle bundle) throws Exception
+        
+ 
+       @Test(groups={"prism","0.2"})
+        public void testFeedSnSOn1ColoWhileThatColoIsDownUsingColoHelper() throws Exception
         {
-            try{
-            Bundle UA1Bundle=new Bundle(bundle,UA1ColoHelper.getEnvFileName());
-            Bundle UA2Bundle=new Bundle(bundle,UA2ColoHelper.getEnvFileName());
+        	Util u = new Util();
+    		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+    		b1.generateUniqueBundle();
+    		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+    		b2.generateUniqueBundle();
+    		
+    		try{
+    			b1 = new Bundle(b1,UA1ColoHelper.getEnvFileName());
+    			b2  = new Bundle(b2,UA2ColoHelper.getEnvFileName());
+    		
+    			b1.setCLusterColo("ua1");
+    			Util.print("cluster b1: "+b1.getClusters().get(0));
+
+    			ServiceResponse r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b1.getClusters().get(0));
+    			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
+
+    			b2.setCLusterColo("ua2");
+    			Util.print("cluster b2: "+b2.getClusters().get(0));
+    			r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b2.getClusters().get(0));
+    			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
+
+    			String startTimeUA1 = "2012-10-01T12:00Z" ;
+    			String startTimeUA2 = "2012-10-01T12:00Z";
+    			
+    			String feed = b1.getDataSets().get(0);
+    			feed =  instanceUtil.setFeedCluster(feed,xmlUtil.createValidity("2012-10-01T12:00Z","2010-01-01T00:00Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),null,ClusterType.SOURCE,null,null);
+    		    feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTimeUA1,"2099-10-01T12:10Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b1.getClusters().get(0)),ClusterType.SOURCE,"${cluster.colo}","/localDC/rc/billing/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+    			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTimeUA2,"2099-10-01T12:25Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b2.getClusters().get(0)),ClusterType.TARGET,null,"/clusterPath/localDC/rc/billing/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+    		
+    		 	Util.print("feed: "+feed);
             
-            UA1Bundle.generateUniqueBundle();
-            UA2Bundle.generateUniqueBundle();
-            
-            submitFeed(UA1Bundle);
-            
-            Util.shutDownService(UA1ColoHelper.getFeedHelper());
-            
-            Util.assertFailed(UA1ColoHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL,UA1Bundle.getDataSets().get(0)));
-            Assert.assertEquals(Util.getOozieFeedJobStatus(Util.readDatasetName(UA1Bundle.getDataSets().get(0)),"RUNNING",UA2ColoHelper).get(0),"No Jobs match your criteria!");
-            }
+    			Util.shutDownService(UA1ColoHelper.getFeedHelper());
+    	        
+    			ServiceResponse response=prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL,feed);
+    			//Util.assertPartialSucceeded(response);
+    			Util.assertSucceeded(response);
+    			response=prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed);
+    			Util.assertSucceeded(response);
+    		
+    		}
             catch(Exception e)
             {
                 e.printStackTrace();
                 throw new TestNGException(e.getMessage());
             }
-            finally{
+            finally {
                 
                 Util.restartService(UA1ColoHelper.getFeedHelper());
-                
+                prismHelper.getClusterHelper().delete(URLS.DELETE_URL, b1.getClusters().get(0));
+                prismHelper.getClusterHelper().delete(URLS.DELETE_URL, b2.getClusters().get(0));
             }
-            
-        }
+
+        }       
+
         
         @Test(dataProvider="DP",groups={"prism","0.2"})
         public void testFeedSnSOn1ColoWhileAnotherColoHasSuspendedFeedUsingColoHelper(Bundle bundle) throws Exception
@@ -513,7 +551,7 @@ public class PrismFeedSnSTest {
             
         }
         
-        
+   
         @Test(dataProvider="DP",groups={"prism","0.2"})
         public void testFeedSnSOn1ColoWhileAnotherColoHasKilledFeedUsingColoHelper(Bundle bundle) throws Exception
         {
@@ -541,10 +579,8 @@ public class PrismFeedSnSTest {
                 throw new TestNGException(e.getMessage());
             }
             
-        }                       
-        
-                
-        
+        }                                             
+   
     private void submitFeed(Bundle bundle) throws Exception
     {
         for(String cluster:bundle.getClusters())
@@ -574,13 +610,14 @@ public class PrismFeedSnSTest {
         }
         Util.assertSucceeded(coloHelper.getFeedHelper().submitAndSchedule(Util.URLS.SUBMIT_AND_SCHEDULE_URL,bundle.getDataSets().get(0)));
     }    
-       
-       
+     
+  
     
     @DataProvider(name="DP")
     public Object[][] getData() throws Exception
     {
-        return Util.readBundles("src/test/resources/LateDataBundles");
+        //return Util.readBundles("src/test/resources/LateDataBundles");
+    	return Util.readELBundles();
     }     
     
 }

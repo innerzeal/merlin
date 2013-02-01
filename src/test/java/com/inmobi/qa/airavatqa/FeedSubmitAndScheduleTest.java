@@ -245,7 +245,7 @@ public class FeedSubmitAndScheduleTest {
 	@DataProvider(name="DP")
 	public Object[][] getBundleData() throws Exception
 	{
-		return Util.readBundles("src/test/resources/bundles/valid/bundle1");
+		return Util.readELBundles();
 	}
 }
 

@@ -5,10 +5,12 @@
 package com.inmobi.qa.airavatqa.prism;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 import com.inmobi.qa.airavatqa.core.Bundle;
 import com.inmobi.qa.airavatqa.core.ColoHelper;
 import com.inmobi.qa.airavatqa.core.PrismHelper;
+import com.inmobi.qa.airavatqa.core.ServiceResponse;
 import com.inmobi.qa.airavatqa.core.Util;
 import org.testng.Assert;
 import org.testng.TestNGException;
@@ -45,9 +47,12 @@ public class PrismFeedSuspendTest {
         UA2Bundle.generateUniqueBundle();
 
         //schedule using colohelpers
-        submitAndScheduleFeedUsingColoHelper(UA1ColoHelper, UA1Bundle);
-        submitAndScheduleFeedUsingColoHelper(UA2ColoHelper, UA2Bundle);
-
+        //submitAndScheduleFeedUsingColoHelper(UA1ColoHelper, UA1Bundle);
+        //submitAndScheduleFeedUsingColoHelper(UA2ColoHelper, UA2Bundle);
+        
+        submitAndScheduleFeed(UA1Bundle);
+        submitAndScheduleFeed(UA2Bundle);
+        
         //delete using prismHelper
         Util.assertSucceeded(prismHelper.getFeedHelper().delete(Util.URLS.DELETE_URL, UA1Bundle.getDataSets().get(0)));
 
@@ -96,6 +101,7 @@ public class PrismFeedSuspendTest {
         }
     }
 
+
     @Test(dataProvider = "DP")
     public void testSuspendNonExistentFeedOnBothColos(Bundle bundle) throws Exception {
         Bundle UA1Bundle = new Bundle(bundle, UA1ColoHelper.getEnvFileName());
@@ -143,18 +149,19 @@ public class PrismFeedSuspendTest {
             //schedule using colohelpers
             submitAndScheduleFeedUsingColoHelper(UA1ColoHelper, UA1Bundle);
             submitAndScheduleFeedUsingColoHelper(UA2ColoHelper, UA2Bundle);
-
+            
+            
             Util.shutDownService(UA1ColoHelper.getFeedHelper());
 
             //suspend using prismHelper
-            Util.assertFailed(prismHelper.getFeedHelper().suspend(Util.URLS.SUSPEND_URL, UA1Bundle.getDataSets().get(0)));
+            Util.assertSucceeded(prismHelper.getFeedHelper().suspend(Util.URLS.SUSPEND_URL, UA1Bundle.getDataSets().get(0)));
             //verify
             Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(UA2Bundle.getDataSets().get(0)), "RUNNING", UA2ColoHelper).get(0).contains("RUNNING"));
 
             //suspend on the other one
             Util.assertSucceeded(prismHelper.getFeedHelper().suspend(Util.URLS.SUSPEND_URL, UA2Bundle.getDataSets().get(0)));
             Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(UA2Bundle.getDataSets().get(0)), "SUSPENDED", UA2ColoHelper).get(0).contains("SUSPENDED"));
-            Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(UA1Bundle.getDataSets().get(0)), "RUNNING", UA1ColoHelper).get(0).contains("RUNNING"));
+            ///Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(UA1Bundle.getDataSets().get(0)), "RUNNING", UA1ColoHelper).get(0).contains("RUNNING"));
         } catch (Exception e) {
             e.printStackTrace();
             throw new TestNGException(e.getCause());
@@ -226,7 +233,7 @@ public class PrismFeedSuspendTest {
 
             Util.shutDownService(UA1ColoHelper.getFeedHelper());
 
-            Util.assertFailed(prismHelper.getFeedHelper().suspend(Util.URLS.SUSPEND_URL, UA1Bundle.getDataSets().get(0)));
+            Util.assertSucceeded(prismHelper.getFeedHelper().suspend(Util.URLS.SUSPEND_URL, UA1Bundle.getDataSets().get(0)));
 
 
             for (int i = 0; i < 2; i++) {
@@ -294,7 +301,7 @@ public class PrismFeedSuspendTest {
         }
 
     }
-        
+  
 
     private void submitFeed(Bundle bundle) throws Exception {
         
@@ -305,13 +312,24 @@ public class PrismFeedSuspendTest {
         Util.assertSucceeded(prismHelper.getFeedHelper().submitEntity(Util.URLS.SUBMIT_URL, bundle.getDataSets().get(0)));
     }
 
+    
     private void submitAndScheduleFeedUsingColoHelper(ColoHelper coloHelper, Bundle bundle) throws Exception {
         submitFeed(bundle);
         Util.assertSucceeded(coloHelper.getFeedHelper().schedule(Util.URLS.SCHEDULE_URL, bundle.getDataSets().get(0)));
     }
+    
+    private void submitAndScheduleFeed(Bundle bundle) throws Exception
+    {
+        for(String cluster:bundle.getClusters())
+        {
+            Util.assertSucceeded(prismHelper.getClusterHelper().submitEntity(Util.URLS.SUBMIT_URL,cluster));
+        }
+        Util.assertSucceeded(prismHelper.getFeedHelper().submitAndSchedule(Util.URLS.SUBMIT_AND_SCHEDULE_URL,bundle.getDataSets().get(0)));
+    }
 
     @DataProvider(name = "DP")
     public Object[][] getData() throws Exception {
-        return Util.readBundles("src/test/resources/LateDataBundles");
+        //return Util.readBundles("src/test/resources/LateDataBundles");
+        return Util.readELBundles();
     }
 }
