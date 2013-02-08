@@ -54,18 +54,18 @@ public class PrismGetTestCase {
 
 			b = new Bundle(b,UA1coloHelper.getEnvFileName());
 			
-			ServiceResponse r =  prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b.getClusterData());
+			ServiceResponse r =  prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b.getClusters().get(0));
 		
 			
 			
-			r = prismHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusterData());
+			r = prismHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusters().get(0));
 		
-			String submittedCluster = b.getClusterData();
+			String submittedCluster = b.getClusters().get(0);
 			String returnedCluster = r.getMessage();
 			Util.print("from api   : "+returnedCluster);
 			Util.print("submitted  : "+submittedCluster);
 					
-			submittedCluster = xmlUtil.marshalUnmarshalCLuster(b.getClusterData());
+			submittedCluster = xmlUtil.marshalUnmarshalCLuster(b.getClusters().get(0));
 			returnedCluster = xmlUtil.marshalUnmarshalCLuster(r.getMessage());
 			
 			Util.print("from api   : "+returnedCluster);
@@ -112,7 +112,7 @@ public class PrismGetTestCase {
 			prismHelper.getProcessHelper().delete(URLS.DELETE_URL,b.getProcessData());
 			prismHelper.getFeedHelper().delete(URLS.DELETE_URL, b.getDataSets().get(0));
 			prismHelper.getFeedHelper().delete(URLS.DELETE_URL, b.getDataSets().get(1));
-			prismHelper.getClusterHelper().delete(URLS.DELETE_URL,b.getClusterData());
+			prismHelper.getClusterHelper().delete(URLS.DELETE_URL,b.getClusters().get(0));
 		}
 	}
 	
@@ -132,14 +132,15 @@ public class PrismGetTestCase {
 		
 			
 			
-			ServiceResponse r = prismHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusterData());
-		
+			//ServiceResponse r = prismHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusterData());
+			ServiceResponse r = prismHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusters().get(0));
 
 			r = prismHelper.getFeedHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION, b.getDataSets().get(0));
 			r = prismHelper.getFeedHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION, b.getDataSets().get(1));
 			r = prismHelper.getProcessHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION, b.getProcessData());
 			
-			r = UA1coloHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusterData());
+			//r = UA1coloHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusters().get(0)());
+			r = UA1coloHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusters().get(0));
 			r = UA1coloHelper.getFeedHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION, b.getDataSets().get(0));
 			r = UA1coloHelper.getFeedHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION, b.getDataSets().get(1));
 			r = UA1coloHelper.getProcessHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION, b.getProcessData());
@@ -151,7 +152,8 @@ public class PrismGetTestCase {
 			prismHelper.getProcessHelper().delete(URLS.DELETE_URL,b.getProcessData());
 			prismHelper.getFeedHelper().delete(URLS.DELETE_URL, b.getDataSets().get(0));
 			prismHelper.getFeedHelper().delete(URLS.DELETE_URL, b.getDataSets().get(1));
-			prismHelper.getClusterHelper().delete(URLS.DELETE_URL,b.getClusterData());
+			//prismHelper.getClusterHelper().delete(URLS.DELETE_URL,b.getClusterData());
+			prismHelper.getClusterHelper().delete(URLS.DELETE_URL,b.getClusters().get(0));		
 		}
 	}
 	
@@ -171,14 +173,15 @@ public class PrismGetTestCase {
 			
 			Util.shutDownService(UA1coloHelper.getClusterHelper());
 
-			ServiceResponse r = prismHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusterData());
-		
+			//ServiceResponse r = prismHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusterData());
+			ServiceResponse r = prismHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusters().get(0));
 
 			r = prismHelper.getFeedHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION, b.getDataSets().get(0));
 			r = prismHelper.getFeedHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION, b.getDataSets().get(1));
 			r = prismHelper.getProcessHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION, b.getProcessData());
 			
-			r = UA1coloHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusterData());
+			//r = UA1coloHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusterData());
+			r = UA1coloHelper.getClusterHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION,b.getClusters().get(0));
 			r = UA1coloHelper.getFeedHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION, b.getDataSets().get(0));
 			r = UA1coloHelper.getFeedHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION, b.getDataSets().get(1));
 			r = UA1coloHelper.getProcessHelper().getEntityDefinition(URLS.GET_ENTITY_DEFINITION, b.getProcessData());
@@ -190,7 +193,8 @@ public class PrismGetTestCase {
 			prismHelper.getProcessHelper().delete(URLS.DELETE_URL,b.getProcessData());
 			prismHelper.getFeedHelper().delete(URLS.DELETE_URL, b.getDataSets().get(0));
 			prismHelper.getFeedHelper().delete(URLS.DELETE_URL, b.getDataSets().get(1));
-			prismHelper.getClusterHelper().delete(URLS.DELETE_URL,b.getClusterData());
+			//prismHelper.getClusterHelper().delete(URLS.DELETE_URL,b.getClusterData());
+			prismHelper.getClusterHelper().delete(URLS.DELETE_URL,b.getClusters().get(0));
 		}
 	}
 	
