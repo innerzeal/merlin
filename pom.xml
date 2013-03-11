@@ -21,10 +21,19 @@
   
   <repositories>
 
-    <repository>
-      <id>releases</id>
-      <url>http://build.corp.inmobi.com:8080/nexus/content/repositories/releases</url>
-    </repository>
+<repository>
+         <id>releases</id>
+         <name>Releases</name>
+         <url>http://maven.scm.corp.inmobi.com/content/repositories/releases/</url>
+      </repository>
+
+
+<repository>
+         <id>snapshots</id>
+         <name>snapshot</name>
+         <url>http://maven.scm.corp.inmobi.com/content/repositories/snapshots/</url>
+      </repository>
+
     <repository>
  <id>cdh.repo</id>
  <url>https://repository.cloudera.com/content/groups/cloudera-repos</url>
@@ -38,15 +47,11 @@
    <id>codehaus-snapshots</id>
    <url>http://snapshots.repository.codehaus.org</url>
   </repository>
-  
- 		<repository>
-            <id>InMobiRepository</id>
-            <name>InMobi Internal Repository</name>
-            <url>http://build.corp.inmobi.com/nexus/content/repositories/snapshots/</url>
-        </repository>
-  
   </repositories>
-
+  
+  
+  
+  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -82,7 +87,11 @@
   </build>
     
   <dependencies>
-  
+  <dependency>
+			<groupId>com.inmobi.qa</groupId>
+			<artifactId>DataCommons</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
  		 <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -119,11 +128,6 @@
 </dependency>
 
 
-  <dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-core</artifactId>
-			<version>5.4.3</version>
-		</dependency>
         
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
@@ -141,7 +145,7 @@
 	 <dependency>
 			<groupId>com.inmobi.grid</groupId>
    			<artifactId>io-lib</artifactId>
-   			<version>0.4-SNAPSHOT</version>
+   			<version>0.4.3</version>
    			<exclusions>
                 <exclusion>
                     <groupId>joda-time</groupId>
@@ -211,5 +215,7 @@
     <artifactId>lombok</artifactId>
     <version>0.11.2</version>
 </dependency>
+
+
   </dependencies>
 </project>
