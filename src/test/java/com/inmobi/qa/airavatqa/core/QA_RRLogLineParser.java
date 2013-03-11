@@ -197,7 +197,7 @@ public ArrayList<ColumnGroupedRow> getRCImpression() throws Exception{
 
 		public static DPRequestInfo getRequestInfo(AdRR requestResponse) throws ELException {
 			DPRequestInfo requestInfo = new DPRequestInfo();
-	        requestInfo.setEpoch_ms(requestResponse.getUnix_ts());
+//	        requestInfo.setEpoch_ms(requestResponse.getUnix_ts());
 	        requestInfo.setFill(requestResponse.getRequest().getN_ads_served() > 0);
 	        requestInfo.setTerminated(requestResponse.isIs_terminated());
 	        if (requestResponse.isIs_terminated()) {
@@ -289,7 +289,7 @@ public ArrayList<ColumnGroupedRow> getRCImpression() throws Exception{
 
 		public static DPRequestCounters getRequestCounters(AdRR requestResponse) throws ELException {
 			DPRequestCounters requestCounters = new DPRequestCounters();
-	        requestCounters.setAds_served(requestResponse.getN_ads_served());
+//	        requestCounters.setAds_served(requestResponse.getN_ads_served());
 	        requestCounters.setTotal_ad_req(requestResponse.getRequest().getN_ads_requested());
 	        requestCounters.setValid_ad_req(requestResponse.getN_ads_resolved());
 			return requestCounters;

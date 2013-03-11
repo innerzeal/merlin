@@ -1405,15 +1405,15 @@ public class instanceUtil {
 
 	}
 
-	public static String setFeedCluster(String feed,Validity v1,
-			Retention r1, String n1, ClusterType t1,String partition, String ...locations) throws Exception {
+	public static String setFeedCluster(String feed,Validity validity,
+			Retention retention, String name, ClusterType type,String partition, String ...locations) throws Exception {
 
 		com.inmobi.qa.airavatqa.generated.feed.Cluster c1 = new com.inmobi.qa.airavatqa.generated.feed.Cluster();
-		c1.setName(n1);
-		c1.setRetention(r1);
-		if(t1!=null)
-			c1.setType(t1);
-		c1.setValidity(v1);
+		c1.setName(name);
+		c1.setRetention(retention);
+		if(type!=null)
+			c1.setType(type);
+		c1.setValidity(validity);
 		if(partition!=null)
 			c1.setPartition(partition);
 
@@ -1442,7 +1442,7 @@ public class instanceUtil {
 		Feed f = getFeedElement(feed);
 
 		int numberOfInitialClusters = f.getClusters().getCluster().size();
-		if(n1 ==  null)
+		if(name ==  null)
 			for(int i = 0 ; i < numberOfInitialClusters ; i++ )	
 				f.getClusters().getCluster().set(i,null);
 		else
@@ -2279,7 +2279,7 @@ public class instanceUtil {
 
 	}
 
-	public static void createEmptyDirWithinDatesAndPrefix(ColoHelper colo,
+	public static ArrayList<String> createEmptyDirWithinDatesAndPrefix(ColoHelper colo,
 			DateTime startDateJoda, DateTime endDateJoda, String prefix,
 			int interval)  throws Exception{
 		List<String> dataDates = Util.getMinuteDatesOnEitherSide(startDateJoda,endDateJoda,interval);
@@ -2293,6 +2293,8 @@ public class instanceUtil {
 			dataFolder.add(dataDates.get(i));
 
 		instanceUtil.createHDFSFolders(colo,dataFolder);
+		
+		return dataFolder;
 		
 	}	
 
