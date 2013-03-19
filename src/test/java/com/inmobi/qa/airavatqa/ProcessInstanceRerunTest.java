@@ -31,7 +31,7 @@ public class ProcessInstanceRerunTest {
 	PrismHelper prismHelper=new PrismHelper("prism.properties");
 	ColoHelper ivoryqa1 = new ColoHelper("ivoryqa-1.config.properties");
 
-// 	@BeforeClass(alwaysRun=true)
+ 	@BeforeClass(alwaysRun=true)
 	public void createTestData() throws Exception
 	{
 
@@ -366,7 +366,7 @@ public class ProcessInstanceRerunTest {
 		}
 	}
 	
-//	@AfterClass(alwaysRun=true)
+	@AfterClass(alwaysRun=true)
 	public void deleteData() throws Exception
 	{
 		Util.print("in @AfterClass");
