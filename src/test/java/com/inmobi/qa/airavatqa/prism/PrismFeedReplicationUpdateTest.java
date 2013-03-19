@@ -50,7 +50,7 @@ public class PrismFeedReplicationUpdateTest {
 	ColoHelper ua3 = new ColoHelper("gs1001.config.properties");
 
 	@SuppressWarnings("deprecation")
-	@Test
+	@Test(enabled=false,timeOut=1200000)
 	public void multipleSourceOneTarget() throws Exception
 	{
 
@@ -109,7 +109,7 @@ public class PrismFeedReplicationUpdateTest {
 			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(instanceUtil.addMinsToTime(startTime,20),instanceUtil.addMinsToTime(startTime,85)),xmlUtil.createRtention("hours(10)",ActionType.DELETE),Util.readClusterName(b1.getClusters().get(0)),ClusterType.TARGET,null);
 			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(instanceUtil.addMinsToTime(startTime,40),instanceUtil.addMinsToTime(startTime,110)),xmlUtil.createRtention("hours(10)",ActionType.DELETE),Util.readClusterName(b3.getClusters().get(0)),ClusterType.SOURCE,"UK/${cluster.colo}");
 
-			
+
 			Util.print("feed: "+feed);
 
 			r= prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
@@ -117,19 +117,19 @@ public class PrismFeedReplicationUpdateTest {
 
 			r= prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed);
 			Thread.sleep(30000);
-			
+
 			//change feed location path
 			feed =	instanceUtil.setFeedFilePath(feed,"/newFeedPath/input-data/rawLogs/oozieExample/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
 
 			Util.print("updated feed: "+ feed);
-			
-			
+
+
 			//update feed
 			prismHelper.getFeedHelper().update(feed,feed);
 			Thread.sleep(30000);
-		
-		
-			
+
+
+
 			Assert.assertEquals(instanceUtil.checkIfFeedCoordExist(ua2.getFeedHelper(),Util.readDatasetName(feed),"REPLICATION"),0);
 			Assert.assertEquals(instanceUtil.checkIfFeedCoordExist(ua2.getFeedHelper(),Util.readDatasetName(feed),"RETENTION"),2);
 			Assert.assertEquals(instanceUtil.checkIfFeedCoordExist(ua3.getFeedHelper(),Util.readDatasetName(feed),"REPLICATION"),0);
@@ -142,18 +142,18 @@ public class PrismFeedReplicationUpdateTest {
 		}
 
 		finally{
-				
+
 			b1.deleteBundle(prismHelper);
 			b2.deleteBundle(prismHelper);
 			b3.deleteBundle(prismHelper);
 		}
 	}
-	
-	@Test
+
+	@Test(enabled=false,timeOut=1200000)
 	public void updateFeed_dependentProcess() throws Exception
 	{
 		//ua1 and ua3 are source. feed01 on ua1 target ua3, feed02 on ua3 target ua1
-		
+
 		//get 3 unique bundles
 		Bundle b1 = (Bundle)Util.readELBundles()[0][0];
 		b1.generateUniqueBundle();
@@ -276,7 +276,7 @@ public class PrismFeedReplicationUpdateTest {
 				if((sUa1.toString().equals("RUNNING") || (sUa1.toString().equals("SUCCEEDED ")))   &&  (sUa2.toString().equals("RUNNING") || sUa2.toString().equals("SUCCEEDED")) )
 					break;
 				Thread.sleep(20000);
-				
+
 			}
 
 			//update feed01
@@ -284,36 +284,36 @@ public class PrismFeedReplicationUpdateTest {
 			feed01 =	instanceUtil.setFeedFilePath(feed01,"/newFeedPath/input-data/rawLogs/oozieExample/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
 
 			Util.print("updated feed: "+ feed01);
-			
-			
+
+
 			Util.shutDownService(ua3.getClusterHelper());
-			
-			
+
+
 			//update feed first time
 			prismHelper.getFeedHelper().update(feed01,feed01);
-			
+
 			//status of feed instance
-		//	ProcessInstancesResult responseInstance  =  prismHelper.getFeedHelper().getProcessInstanceStatus(Util.readDatasetName(feed01),"?start="+startTime+"&end="+instanceUtil.addMinsToTime(startTime,200));
-			
+			//	ProcessInstancesResult responseInstance  =  prismHelper.getFeedHelper().getProcessInstanceStatus(Util.readDatasetName(feed01),"?start="+startTime+"&end="+instanceUtil.addMinsToTime(startTime,200));
+
 			//status of process instance
 
-		//	responseInstance  =  prismHelper.getProcessHelper().getProcessInstanceStatus(Util.readEntityName(b1.getProcessData()),"?start="+processStartTime+"&end="+processEndTime);
-		
-			
+			//	responseInstance  =  prismHelper.getProcessHelper().getProcessInstanceStatus(Util.readEntityName(b1.getProcessData()),"?start="+processStartTime+"&end="+processEndTime);
+
+
 			Util.startService(ua3.getClusterHelper());
-			
+
 			//re update for the second time : check update roll forward
 			prismHelper.getFeedHelper().update(feed01,feed01);
-			
-		
+
+
 			//status of feed instance
-		//	responseInstance  =  prismHelper.getFeedHelper().getProcessInstanceStatus(Util.readDatasetName(feed01),"?start="+startTime+"&end="+instanceUtil.addMinsToTime(startTime,200));
-			
+			//	responseInstance  =  prismHelper.getFeedHelper().getProcessInstanceStatus(Util.readDatasetName(feed01),"?start="+startTime+"&end="+instanceUtil.addMinsToTime(startTime,200));
+
 			//status of process instance
 
-		//	responseInstance  =  prismHelper.getProcessHelper().getProcessInstanceStatus(Util.readEntityName(b1.getProcessData()),"?start="+processStartTime+"&end="+processEndTime);
-		
-			
+			//	responseInstance  =  prismHelper.getProcessHelper().getProcessInstanceStatus(Util.readEntityName(b1.getProcessData()),"?start="+processStartTime+"&end="+processEndTime);
+
+
 
 		}
 		finally

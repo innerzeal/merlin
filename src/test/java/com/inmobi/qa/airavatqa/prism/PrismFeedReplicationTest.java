@@ -14,20 +14,20 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ColoHelper;
-import com.inmobi.qa.airavatqa.core.PrismHelper;
-import com.inmobi.qa.airavatqa.core.ProcessInstancesResult;
-import com.inmobi.qa.airavatqa.core.ServiceResponse;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.core.instanceUtil;
-import com.inmobi.qa.airavatqa.core.xmlUtil;
-import com.inmobi.qa.airavatqa.core.Util.URLS;
-import com.inmobi.qa.airavatqa.generated.feed.ActionType;
-import com.inmobi.qa.airavatqa.generated.feed.ClusterType;
-import com.inmobi.qa.airavatqa.generated.feed.Retention;
-import com.inmobi.qa.airavatqa.generated.feed.Validity;
-import com.inmobi.qa.airavatqa.mq.Consumer;
+import com.inmobi.qa.ivory.bundle.Bundle;
+import com.inmobi.qa.ivory.generated.feed.ActionType;
+import com.inmobi.qa.ivory.generated.feed.ClusterType;
+import com.inmobi.qa.ivory.helpers.ColoHelper;
+import com.inmobi.qa.ivory.helpers.PrismHelper;
+import com.inmobi.qa.ivory.response.ProcessInstancesResult;
+import com.inmobi.qa.ivory.response.ServiceResponse;
+import com.inmobi.qa.ivory.supportClasses.Consumer;
+import com.inmobi.qa.ivory.util.Util;
+import com.inmobi.qa.ivory.util.Util.URLS;
+import com.inmobi.qa.ivory.util.instanceUtil;
+import com.inmobi.qa.ivory.util.xmlUtil;
+
+
 
 public class PrismFeedReplicationTest {
 
@@ -56,7 +56,7 @@ public class PrismFeedReplicationTest {
 
 	ColoHelper ua3 = new ColoHelper("gs1001.config.properties");
 
-	@Test
+	@Test(enabled=false,timeOut=1200000)
 	public void multipleSourceOneTarget_oneSourceWithPartition() throws Exception
 	{
 
@@ -127,7 +127,7 @@ public class PrismFeedReplicationTest {
 
 	
 	
-	@Test
+	@Test(enabled=false,timeOut=1200000)
 	public void multipleTargetOneSource() throws Exception
 	{
 
@@ -308,7 +308,7 @@ public class PrismFeedReplicationTest {
 
 
 
-		@Test
+		@Test(enabled=false,timeOut=1200000)
 	public void multipleSourceOneTarget() throws Exception
 	{
 
@@ -421,7 +421,7 @@ public class PrismFeedReplicationTest {
 	}
 
 
-	@Test
+	@Test(enabled=false,timeOut=1200000)
 	public void onlyOneTarget() throws Exception
 	{
 		Bundle b1 = (Bundle)Util.readELBundles()[0][0];
@@ -468,7 +468,7 @@ public class PrismFeedReplicationTest {
 
 
 	
-	@Test
+	@Test(enabled=false,timeOut=1200000)
 	public void onlyOneSource() throws Exception
 	{
 		Bundle b1 = (Bundle)Util.readELBundles()[0][0];
@@ -518,7 +518,7 @@ public class PrismFeedReplicationTest {
 		}
 	}
 
-    @Test
+    @Test(enabled=false,timeOut=1200000)
 	public void muultipeSourceNoTarget_noPartitionAtTop() throws Exception
 	{
 		Bundle b1 = (Bundle)Util.readELBundles()[0][0];
@@ -586,7 +586,7 @@ public class PrismFeedReplicationTest {
 
 
 
-	@Test
+	@Test(enabled=false,timeOut=1200000)
 	public void muultipeSourceNoTarget_noPartition() throws Exception
 	{
 		Bundle b1 = (Bundle)Util.readELBundles()[0][0];
@@ -655,7 +655,7 @@ public class PrismFeedReplicationTest {
 
 	@SuppressWarnings("deprecation")
 
-	@Test
+	@Test(enabled=false,timeOut=1200000)
 	public void oneSourceOneTarget_FeedResume() throws Exception
 	{
 
@@ -721,7 +721,7 @@ public class PrismFeedReplicationTest {
 		}
 	}
 
-	@Test
+	@Test(enabled=false,timeOut=1200000)
 	public void oneSourceOneTarget_AlalibilityFlag() throws Exception
 	{
 
@@ -785,7 +785,7 @@ public class PrismFeedReplicationTest {
 
 
 
-	@Test
+	@Test(enabled=false,timeOut=1200000)
 	public void oneSourceOneTarget_PrismTarget() throws Exception
 	{
 
@@ -904,8 +904,8 @@ public class PrismFeedReplicationTest {
 		}
 	}
 
-	@Test
-	public void oneSourceOneTarget() throws Exception
+	@Test(enabled=true,timeOut=1200000)
+	public void oneSourceOneTarget_extraDataTargetDelete() throws Exception
 	{
 
 		Bundle b1 = (Bundle)Util.readELBundles()[0][0];
@@ -916,6 +916,70 @@ public class PrismFeedReplicationTest {
 		try{
 			b1 = new Bundle(b1,ua1.getEnvFileName());
 
+			b2  = new Bundle(b2,ua3.getEnvFileName());
+
+			b1.setInputFeedDataPath("/replicationDeleteExtraTargetTest/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+
+			b1.setCLusterColo("ua1");
+			b2.setCLusterColo("ua3");
+			
+			Bundle.submitCluster(b1,b2);
+		
+			String feed = b1.getDataSets().get(0);
+			feed =  instanceUtil.setFeedCluster(feed,xmlUtil.createValidity("2009-02-01T00:00Z","2012-01-01T00:00Z"),xmlUtil.createRtention("hours(10)",ActionType.DELETE),null,ClusterType.SOURCE,null);
+
+			String prefix = b1.getFeedDataPathPrefix();
+			Util.HDFSCleanup(ua1,prefix.substring(1));
+			Util.HDFSCleanup(ua3,prefix.substring(1));
+			
+			instanceUtil.putFileInFolders(ua1,instanceUtil.createEmptyDirWithinDatesAndPrefix(ua1, instanceUtil.oozieDateToDate(instanceUtil.getTimeWrtSystemTime(-20)), instanceUtil.oozieDateToDate(instanceUtil.getTimeWrtSystemTime(10)), "/replicationDeleteExtraTargetTest/", 1),"log_01.txt","xmlFileName.xml","_SUCCESS");
+			instanceUtil.putFileInFolders(ua3,instanceUtil.createEmptyDirWithinDatesAndPrefix(ua3, instanceUtil.oozieDateToDate(instanceUtil.getTimeWrtSystemTime(-20)), instanceUtil.oozieDateToDate(instanceUtil.getTimeWrtSystemTime(10)), "/replicationDeleteExtraTargetTest/", 1),"QABackLog.txt","xmlFileName.xml");
+
+
+			String startTime = instanceUtil.getTimeWrtSystemTime(-10);
+
+			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTime,"2099-01-01T00:00Z"),xmlUtil.createRtention("hours(10)",ActionType.DELETE),Util.readClusterName(b1.getClusters().get(0)),ClusterType.SOURCE,null);
+			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTime,"2099-01-01T00:00Z"),xmlUtil.createRtention("hours(10)",ActionType.DELETE),Util.readClusterName(b2.getClusters().get(0)),ClusterType.TARGET,null);
+
+
+			Util.print("feed: "+feed);
+
+			ServiceResponse r = prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
+			r= prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed);
+
+		
+
+	/*		String bundleID = instanceUtil.getLatestBundleID(Util.readDatasetName(feed),"FEED",ua1.getClusterHelper());
+
+			if(bundleID!=null)
+			{
+				String retentionCoord = instanceUtil.getRetentionCoordID(bundleID, ua1.getClusterHelper());
+				if(retentionCoord== null)
+					Assert.assertTrue(false);
+			}
+*/
+
+
+		}
+
+		finally{
+			b1.deleteBundle(prismHelper);
+			b2.deleteBundle(prismHelper);
+
+		}
+	}
+
+	@Test(enabled=false,timeOut=1200000)
+	public void oneSourceOneTarget() throws Exception
+	{
+
+		Bundle b1 = (Bundle)Util.readELBundles()[0][0];
+		b1.generateUniqueBundle();
+		Bundle b2 = (Bundle)Util.readELBundles()[0][0];
+		b2.generateUniqueBundle();
+
+		try{
+			b1 = new Bundle(b1,ua1.getEnvFileName());
 			b2  = new Bundle(b2,ua2.getEnvFileName());
 
 			b1.setInputFeedDataPath("/samarthRetention/input-data/rawLogs/oozieExample/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
@@ -980,4 +1044,5 @@ public class PrismFeedReplicationTest {
 		}
 	}
 
+	
 }

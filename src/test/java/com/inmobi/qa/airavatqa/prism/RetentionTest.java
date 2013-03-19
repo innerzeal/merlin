@@ -21,6 +21,7 @@ import javax.xml.bind.JAXBContext;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.testng.TestNGException;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -30,7 +31,13 @@ import org.testng.annotations.Test;
  * @author rishu.mehrotra
  */
 public class RetentionTest {
-
+	@BeforeClass(alwaysRun=true)
+	public void createTestData() throws Exception
+	{
+		Util.restartService(UA1coloHelper.getProcessHelper());
+		Util.restartService(UA2ColoHelper.getProcessHelper());
+		Util.restartService(UA3ColoHelper.getProcessHelper());
+	}
 
 	@BeforeMethod(alwaysRun=true)
 	public void testName(Method method)
@@ -43,7 +50,9 @@ public class RetentionTest {
 
 	PrismHelper prismHelper=new PrismHelper("prism.properties");
 	ColoHelper UA1coloHelper=new ColoHelper("mk-qa.config.properties");
-	ColoHelper UA2ColoHelper = new ColoHelper("ivoryqa-1.config.properties");
+	ColoHelper UA2ColoHelper = new ColoHelper("gs1001.config.properties");
+    ColoHelper UA3ColoHelper = new ColoHelper("ivoryqa-1.config.properties");
+
 
 	DateTimeFormatter formatter=DateTimeFormat.forPattern("yyyy/MM/dd/HH/mm");
 

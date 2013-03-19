@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.fs.Path;
-import org.apache.ivory.entity.v0.Frequency.TimeUnit;
-import org.apache.oozie.client.WorkflowAction.Status;
 import org.joda.time.DateTime;
 import org.joda.time.Minutes;
 import org.testng.Assert;
@@ -15,20 +13,23 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.inmobi.qa.airavatqa.core.AssertUtil;
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ColoHelper;
-import com.inmobi.qa.airavatqa.core.ENTITY_TYPE;
-import com.inmobi.qa.airavatqa.core.GetBundle;
-import com.inmobi.qa.airavatqa.core.PrismHelper;
-import com.inmobi.qa.airavatqa.core.ServiceResponse;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.core.hadoopUtil;
-import com.inmobi.qa.airavatqa.core.instanceUtil;
-import com.inmobi.qa.airavatqa.core.xmlUtil;
-import com.inmobi.qa.airavatqa.core.Util.URLS;
-import com.inmobi.qa.airavatqa.generated.feed.ActionType;
-import com.inmobi.qa.airavatqa.generated.feed.ClusterType;
+import com.inmobi.qa.ivory.bundle.Bundle;
+import com.inmobi.qa.ivory.generated.dependencies.Frequency.TimeUnit;
+import com.inmobi.qa.ivory.generated.feed.ActionType;
+import com.inmobi.qa.ivory.generated.feed.ClusterType;
+import com.inmobi.qa.ivory.helpers.ColoHelper;
+import com.inmobi.qa.ivory.helpers.PrismHelper;
+import com.inmobi.qa.ivory.response.ServiceResponse;
+import com.inmobi.qa.ivory.supportClasses.ENTITY_TYPE;
+import com.inmobi.qa.ivory.supportClasses.GetBundle;
+import com.inmobi.qa.ivory.util.AssertUtil;
+import com.inmobi.qa.ivory.util.Util;
+import com.inmobi.qa.ivory.util.Util.URLS;
+import com.inmobi.qa.ivory.util.hadoopUtil;
+import com.inmobi.qa.ivory.util.instanceUtil;
+import com.inmobi.qa.ivory.util.xmlUtil;
+
+
 
 public class TTLogCleanUpTest {
 
@@ -41,7 +42,7 @@ public class TTLogCleanUpTest {
 	ColoHelper ua3 = new ColoHelper("gs1001.config.properties");
 
 
-	@BeforeClass(alwaysRun=true)
+	//	@BeforeClass(alwaysRun=true)
 	public void createTestData() throws Exception
 	{
 
@@ -54,12 +55,11 @@ public class TTLogCleanUpTest {
 		Bundle b = new Bundle();
 		b = (Bundle)Util.readELBundles()[0][0];
 		b  = new Bundle(b,ua2.getEnvFileName());
-		b = new Bundle(b,ua2.getEnvFileName());
 
 		String startDate = "2010-01-01T20:00Z";
 		String endDate = "2010-01-02T03:04Z";
 
-		b.setInputFeedDataPath("/samarthData/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+		b.setInputFeedDataPath("/logCleanUpTest/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
 		String prefix = b.getFeedDataPathPrefix();
 		Util.HDFSCleanup(ua2,prefix.substring(1));
 
@@ -91,17 +91,18 @@ public class TTLogCleanUpTest {
 	}
 
 
-	@Test(enabled=false, timeOut=12000000)
+	@Test(enabled=true, timeOut=12000000)
 	public void feedReplicaltionLogCleanUp() throws Exception
 	{
 
 		// instance log retention is set as 6 mins. Log clean up service run every 10 minutes
 		//when test case starts tomcat has been force restarted , so log cleanup service should have just run. 
-		Bundle b1 = (Bundle)Util.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Thread.sleep(30000);
+		Bundle b1 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b1.generateUniqueBundle();
-		Bundle b2 = (Bundle)Util.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b2 =  (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b2.generateUniqueBundle();
-		Bundle b3 = (Bundle)Util.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b3 =  (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b3.generateUniqueBundle();
 
 		try{
@@ -114,72 +115,59 @@ public class TTLogCleanUpTest {
 			b2  = new Bundle(b2,ua2.getEnvFileName());
 			b3  = new Bundle(b3,ua3.getEnvFileName());
 
-
-
-
 			b1.setCLusterColo("ua1");
-			Util.print("cluster b1: "+b1.getClusters().get(0));
-			ServiceResponse r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b1.getClusters().get(0));
-			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
-
-
 			b2.setCLusterColo("ua2");
-			Util.print("cluster b2: "+b2.getClusters().get(0));
-			r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b2.getClusters().get(0));
-			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
-
-
 			b3.setCLusterColo("ua3");
-			Util.print("cluster b3: "+b3.getClusters().get(0));
-			r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b3.getClusters().get(0));
-			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
+
+			Bundle.submitCluster(b1,b2,b3);
 
 			String startTimeUA1 = "2012-10-01T12:05Z" ;
 			String startTimeUA2 = "2012-10-01T12:10Z";
 
 
+		//	instanceUtil.putFileInFolders(ua2,instanceUtil.createEmptyDirWithinDatesAndPrefix(ua2, instanceUtil.oozieDateToDate("2012-10-01T12:04Z"), instanceUtil.oozieDateToDate("2012-10-01T12:10Z"), "/logCleanUpTest/", 1),"thriftRRMar0602.gz");
+
+			
+			
 			String feed = b1.getDataSets().get(0);
-			feed = instanceUtil.setFeedFilePath(feed,"/dataBillingRC/fetlrc/billing/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}/");
+			feed = instanceUtil.setFeedFilePath(feed,"/logCleanUpTest/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}/");
 			feed =  instanceUtil.setFeedCluster(feed,xmlUtil.createValidity("2012-10-01T12:00Z","2010-01-01T00:00Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),null,ClusterType.SOURCE,null);
 
 			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTimeUA1,"2012-10-01T12:10Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b1.getClusters().get(0)),ClusterType.TARGET,"${cluster.colo}");
-			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTimeUA2,"2012-10-01T12:25Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b2.getClusters().get(0)),ClusterType.TARGET,"${cluster.colo}");
-			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity("2012-10-01T12:00Z","2099-01-01T00:00Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b3.getClusters().get(0)),ClusterType.SOURCE,null);
+			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTimeUA2,"2012-10-01T12:25Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b3.getClusters().get(0)),ClusterType.TARGET,"${cluster.colo}");
+			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity("2012-10-01T12:00Z","2099-01-01T00:00Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b2.getClusters().get(0)),ClusterType.SOURCE,null);
 
 			//clean target if old data exists
-			String prefix = "/dataBillingRC/fetlrc/billing/2012/10/01/12/";
+			String prefix = "/logCleanUpTest/2012/10/01/12/";
+			Util.HDFSCleanup(ua3,prefix.substring(1));
 			Util.HDFSCleanup(ua1,prefix.substring(1));
-			Util.HDFSCleanup(ua2,prefix.substring(1));
 
 
 			Util.print("feed: "+feed);
 
-			r= prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
+			ServiceResponse r = prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
 			Thread.sleep(10000);
 			AssertUtil.assertSucceeded(r);
 
 			r= prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed);
 			Thread.sleep(15000);
 
-			//get feed schedule time
-			DateTime feedScheduleTime = Util.getSystemDate(prismHelper);
-
-
+			
 			//wait for first instance to succeed 
 			instanceUtil.waitTillParticularInstanceReachState(ua1,Util.getFeedName(feed),0, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
-			instanceUtil.waitTillParticularInstanceReachState(ua2,Util.getFeedName(feed),0, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
+			instanceUtil.waitTillParticularInstanceReachState(ua3,Util.getFeedName(feed),0, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
 
 			//check in current time is past 3 minutes from start of tomcat
 			DateTime firstInstanceCompleteTime = Util.getSystemDate(prismHelper);
-			Minutes m = Minutes.minutesBetween( serviceRestartTime,firstInstanceCompleteTime);
+			Minutes m = Minutes.minutesBetween(serviceRestartTime,firstInstanceCompleteTime);
 
-			if(m.getMinutes() <5){
+	/*		if(m.getMinutes() <5){
 				Util.print("sleeping for: "+(5-m.getMinutes())*60*1000);
 				Thread.sleep((5-m.getMinutes())*60*1000);
-			}
+			}*/
 			//rerun first instance of replicaltion
 			ua1.getFeedHelper().getProcessInstanceRerun(Util.getFeedName(feed),"?start=2012-10-01T12:05Z");
-			ua2.getFeedHelper().getProcessInstanceRerun(Util.getFeedName(feed),"?start=2012-10-01T12:10Z");
+			ua3.getFeedHelper().getProcessInstanceRerun(Util.getFeedName(feed),"?start=2012-10-01T12:10Z");
 
 
 			//wait for 10 minutes complete 
@@ -190,6 +178,9 @@ public class TTLogCleanUpTest {
 
 			}
 
+			
+			
+			
 			//check for logs .... only first instance log should have been deleted
 			ArrayList<Path> ua1ReplicatedData =hadoopUtil.getAllFilesRecursivelyHDFS(ua1, new Path("/dataBillingRC/fetlrc/billing/2012/10/01/12/"));
 			//check for no ua2 or ua3 in ua1
@@ -227,7 +218,7 @@ public class TTLogCleanUpTest {
 	}
 
 
-	@Test(enabled=true, timeOut=12000000)
+	@Test(enabled=false, timeOut=12000000)
 	public void processLogCleanUp() throws Exception
 	{
 		//restart service at start of test case
@@ -237,6 +228,7 @@ public class TTLogCleanUpTest {
 		//wait for 10 mins from the restart. 
 		//log of first run of first instance should only be deleted. others should be present. 
 		DateTime serviceRestartTime = Util.getSystemDate(prismHelper);
+		System.out.println("serviceRestartTime: "+serviceRestartTime);
 		Thread.sleep(20000);
 
 		Bundle b = new Bundle();
@@ -245,8 +237,10 @@ public class TTLogCleanUpTest {
 		try{
 
 			b = (Bundle)Util.readBundle(GetBundle.RegularBundle)[0][0];
-			b  = new Bundle(b,ua2.getEnvFileName());
-			b.setInputFeedDataPath("/samarthData/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+			b  = new Bundle(b,ua3.getEnvFileName());
+			b.setInputFeedDataPath("/logRetentionTest/process/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+
+			instanceUtil.putFileInFolders(ua3,instanceUtil.createEmptyDirWithinDatesAndPrefix(ua3, instanceUtil.oozieDateToDate("2010-01-02T00:40Z"), instanceUtil.oozieDateToDate("2010-01-02T01:10Z"), "/logRetentionTest/process/", 1),"log_01.txt");
 
 			b.setProcessValidity("2010-01-02T01:00Z","2010-01-02T01:07Z");
 			b.setProcessPeriodicity(5,TimeUnit.minutes);
@@ -257,11 +251,11 @@ public class TTLogCleanUpTest {
 
 			//sleep for 5 mins
 			Util.print("sleeping for: 300000 milli seconds");
-			Thread.sleep(300000);
-			
+		//	Thread.sleep(300000);
+
 			//rerun the first instance
 			prismHelper.getProcessHelper().getProcessInstanceRerun(Util.readEntityName(b.getProcessData()),"?start=2010-01-02T01:00Z");
-			
+
 			//wait for 10 mins to complete from restart
 			Minutes m = Minutes.minutesBetween( serviceRestartTime,Util.getSystemDate(prismHelper));
 			while(m.getMinutes()<10){
@@ -269,16 +263,16 @@ public class TTLogCleanUpTest {
 				Util.print("minutes remaining for 10 min restart: "+ (10 - m.getMinutes()));
 				Thread.sleep(20000);
 			}
-			
+
 		}
 		finally{
-		//	b.deleteBundle(prismHelper);
+				b.deleteBundle(prismHelper);
 
 		}
 
 	}
 
-	@AfterClass(alwaysRun=true)
+//	@AfterClass(alwaysRun=true)
 	public void deleteData() throws Exception
 	{
 		Util.print("in @AfterClass");

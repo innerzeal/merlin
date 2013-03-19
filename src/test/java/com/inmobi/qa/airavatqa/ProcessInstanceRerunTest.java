@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.ivory.entity.v0.Frequency.TimeUnit;
 import org.apache.oozie.client.CoordinatorAction;
 import org.apache.oozie.client.WorkflowAction.Status;
 import org.testng.Assert;
@@ -12,23 +11,27 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ColoHelper;
-import com.inmobi.qa.airavatqa.core.PrismHelper;
-import com.inmobi.qa.airavatqa.core.ProcessEntityHelperImpl;
-import com.inmobi.qa.airavatqa.core.ProcessInstancesResult;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.core.instanceUtil;
+
+
+
 import org.joda.time.DateTime;
 import org.testng.annotations.AfterGroups;
 import org.testng.annotations.BeforeGroups;
+
+import com.inmobi.qa.ivory.bundle.Bundle;
+import com.inmobi.qa.ivory.generated.dependencies.Frequency.TimeUnit;
+import com.inmobi.qa.ivory.helpers.ColoHelper;
+import com.inmobi.qa.ivory.helpers.PrismHelper;
+import com.inmobi.qa.ivory.response.ProcessInstancesResult;
+import com.inmobi.qa.ivory.util.Util;
+import com.inmobi.qa.ivory.util.instanceUtil;
 
 public class ProcessInstanceRerunTest {
 
 	PrismHelper prismHelper=new PrismHelper("prism.properties");
 	ColoHelper ivoryqa1 = new ColoHelper("ivoryqa-1.config.properties");
 
- //	@BeforeClass(alwaysRun=true)
+// 	@BeforeClass(alwaysRun=true)
 	public void createTestData() throws Exception
 	{
 
@@ -73,6 +76,7 @@ public class ProcessInstanceRerunTest {
 	{
 		Util.print("test name: "+method.getName());
 	}
+	
 	
 	@Test(groups = { "0.1","0.2"})
 	public void testProcessInstanceRerun_someKilled02() throws Exception
@@ -301,47 +305,6 @@ public class ProcessInstanceRerunTest {
 	}
 
 
-
-
-	
-
-
-
-
-	
-	
-
-	
-	@Test(groups = { "0.1","0.2"})
-	public void testProcessInstanceRerun_multipleSucceeded() throws Exception
-	{
-		Bundle b = new Bundle();
-
-		try{
-
-			b = (Bundle)Util.readELBundles()[0][0];
-			b  = new Bundle(b,ivoryqa1.getEnvFileName());
-			b.setInputFeedDataPath("/samarthData/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
-
-			b.setProcessValidity("2010-01-02T01:00Z","2010-01-02T01:11Z");
-			b.setProcessPeriodicity(5,TimeUnit.minutes);
-			b.setOutputFeedPeriodicity(5,TimeUnit.minutes);
-			b.setOutputFeedLocationData("/examples/samarth/output-data/aggregator/aggregatedLogs/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
-			b.setProcessConcurrency(3);
-			b.submitAndScheduleBundle(prismHelper);
-			//Thread.sleep(240000);
-			prismHelper.getProcessHelper().getProcessInstanceRerun(Util.readEntityName(b.getProcessData()),"?start=2010-01-02T01:00Z&end=2010-01-02T01:11Z");
-			Thread.sleep(15000);
-			instanceUtil.areWorkflowsRunning(ivoryqa1,Util.readEntityName(b.getProcessData()),3,3,0,0);
-		}
-		finally{
-			b.deleteBundle(prismHelper);
-		}
-	}
-
-	
-	
-
 	@Test(groups = { "0.1","0.2"})
 	public void testProcessInstanceRerun_singleSuspended() throws Exception
 	{
@@ -371,8 +334,39 @@ public class ProcessInstanceRerunTest {
 			b.deleteBundle(prismHelper);
 		}
 	}
+	
+	
 
-	@AfterClass(alwaysRun=true)
+	
+	
+	@Test(groups = { "0.1","0.2"})
+	public void testProcessInstanceRerun_multipleSucceeded() throws Exception
+	{
+		Bundle b = new Bundle();
+
+		try{
+
+			b = (Bundle)Util.readELBundles()[0][0];
+			b  = new Bundle(b,ivoryqa1.getEnvFileName());
+			b.setInputFeedDataPath("/samarthData/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+
+			b.setProcessValidity("2010-01-02T01:00Z","2010-01-02T01:11Z");
+			b.setProcessPeriodicity(5,TimeUnit.minutes);
+			b.setOutputFeedPeriodicity(5,TimeUnit.minutes);
+			b.setOutputFeedLocationData("/examples/samarth/output-data/aggregator/aggregatedLogs/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+			b.setProcessConcurrency(3);
+			b.submitAndScheduleBundle(prismHelper);
+			//Thread.sleep(240000);
+			prismHelper.getProcessHelper().getProcessInstanceRerun(Util.readEntityName(b.getProcessData()),"?start=2010-01-02T01:00Z&end=2010-01-02T01:11Z");
+			Thread.sleep(15000);
+			instanceUtil.areWorkflowsRunning(ivoryqa1,Util.readEntityName(b.getProcessData()),3,3,0,0);
+		}
+		finally{
+			b.deleteBundle(prismHelper);
+		}
+	}
+	
+//	@AfterClass(alwaysRun=true)
 	public void deleteData() throws Exception
 	{
 		Util.print("in @AfterClass");
