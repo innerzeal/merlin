@@ -9,10 +9,10 @@
 package com.inmobi.qa.airavatqa.generated.feed;
 
 import java.util.Date;
+
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import com.inmobi.qa.airavatqa.core.SchemaHelper;
-
+import com.inmobi.qa.ivory.generated.dependencies.SchemaHelper;
 public class Adapter1
     extends XmlAdapter<String, Date>
 {

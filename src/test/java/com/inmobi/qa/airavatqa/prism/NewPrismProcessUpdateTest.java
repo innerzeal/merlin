@@ -4,25 +4,18 @@
  */
 package com.inmobi.qa.airavatqa.prism;
 
-import com.inmobi.qa.airavatqa.core.APIResult;
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ColoHelper;
-import com.inmobi.qa.airavatqa.core.PrismHelper;
-import com.inmobi.qa.airavatqa.core.ServiceResponse;
 
+
+import org.testng.annotations.Test;
+import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.generated.feed.ClusterType;
-import com.inmobi.qa.airavatqa.core.Util.URLS;
-import com.inmobi.qa.airavatqa.core.instanceUtil;
-import com.inmobi.qa.airavatqa.generated.process.ExecutionType;
+
 
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Random;
-import org.apache.ivory.entity.v0.Frequency;
-import org.apache.ivory.entity.v0.Frequency.TimeUnit;
+
 import org.apache.oozie.client.BundleJob;
 import org.apache.oozie.client.CoordinatorJob;
 import org.apache.oozie.client.Job.Status;
@@ -35,27 +28,40 @@ import org.joda.time.format.DateTimeFormatter;
 import org.testng.Assert;
 import org.testng.TestNGException;
 
-/**
- *
- * @author rishu.mehrotra
- */
+import com.inmobi.qa.ivory.bundle.Bundle;
+import com.inmobi.qa.ivory.generated.dependencies.Frequency;
+import com.inmobi.qa.ivory.generated.dependencies.Frequency.TimeUnit;
+import com.inmobi.qa.ivory.generated.feed.ActionType;
+import com.inmobi.qa.ivory.generated.feed.ClusterType;
+import com.inmobi.qa.ivory.generated.process.ExecutionType;
+import com.inmobi.qa.ivory.generated.process.Process;
+import com.inmobi.qa.ivory.helpers.ColoHelper;
+import com.inmobi.qa.ivory.helpers.PrismHelper;
+import com.inmobi.qa.ivory.response.APIResult;
+import com.inmobi.qa.ivory.response.ServiceResponse;
+import com.inmobi.qa.ivory.util.Util;
+import com.inmobi.qa.ivory.util.Util.URLS;
+import com.inmobi.qa.ivory.util.instanceUtil;
+import com.inmobi.qa.ivory.util.xmlUtil;
+
 public class NewPrismProcessUpdateTest {
 
-	
+
+	@Test
 	@BeforeMethod(alwaysRun=true)
 	public void testName(Method method)
 	{
 		Util.print("test name: "+method.getName());
 	}
-	
-	
-    PrismHelper prismHelper = new PrismHelper("prism.properties");
-    ColoHelper UA1ColoHelper = new ColoHelper("mk-qa.config.properties");
-    ColoHelper UA2ColoHelper = new ColoHelper("ivoryqa-1.config.properties");
-    ColoHelper UA3ColoHelper = new ColoHelper("gs1001.config.properties");
-    DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy/MM/dd/HH/mm");
-    
-    @Test(dataProvider = "DP", groups = {"prism", "0.2"}, dataProviderClass = Bundle.class)
+
+
+	PrismHelper prismHelper = new PrismHelper("prism.properties");
+	ColoHelper UA1ColoHelper = new ColoHelper("mk-qa.config.properties");
+	ColoHelper UA2ColoHelper = new ColoHelper("ivoryqa-1.config.properties");
+	ColoHelper UA3ColoHelper = new ColoHelper("gs1001.config.properties");
+	DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy/MM/dd/HH/mm");
+
+	   @Test(dataProvider = "DP", groups = {"prism", "0.2"}, dataProviderClass = Bundle.class)
     @SuppressWarnings("SleepWhileInLoop")
     public void updateProcessRollStartTimeForwardInEachColoWithOneProcessRunning(Bundle bundle) throws Exception {
         Bundle UA1Bundle = new Bundle(bundle, UA1ColoHelper);
@@ -78,15 +84,15 @@ public class NewPrismProcessUpdateTest {
             int coordCount = Util.getNumberOfWorkflowInstances(UA3ColoHelper, oldBundleId);
 
         //    String newStartTime = instanceUtil.addMinsToTime(UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getStart(), 3);
-            
-            
+
+
             String newStartTime = instanceUtil.addMinsToTime(instanceUtil.dateToOozieDate(UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getStart()), 20);
             String newEndTime = instanceUtil.addMinsToTime(instanceUtil.dateToOozieDate(UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getStart()), 30);
 
             UA2Bundle.setProcessValidity(newStartTime, newEndTime);
 
             waitForProcessToReachACertainState(UA3ColoHelper, UA2Bundle, "RUNNING");
-            
+
             //Util.assertSucceeded(prismHelper.getProcessHelper().update(UA2Bundle.getProcessData(),UA2Bundle.getProcessData()));
             while (Util.parseResponse(prismHelper.getProcessHelper().update(UA2Bundle.getProcessData(), UA2Bundle.getProcessData())).getStatus() != APIResult.Status.SUCCEEDED) {
                 System.out.println("updated at "+DateTime.now().toString());
@@ -115,7 +121,7 @@ public class NewPrismProcessUpdateTest {
 
         }
     }
-    
+
     @Test(dataProvider = "DP", groups = {"prism", "0.2"}, dataProviderClass = Bundle.class)
     public void updateProcessConcurrencyWorkflowExecutionInEachColoWithOneColoDown(Bundle bundle) throws Exception {
 
@@ -248,7 +254,7 @@ public class NewPrismProcessUpdateTest {
 
     @Test(dataProvider = "DP", groups = {"prism", "0.2"}, dataProviderClass = Bundle.class)
     public void updateProcessNameInEachColoWithOneProcessRunning(Bundle bundle) throws Exception {
-        
+
         System.out.println("executing: updateProcessNameInEachColoWithOneProcessRunning");
         Bundle UA1Bundle = new Bundle(bundle, UA1ColoHelper);
         Bundle UA2Bundle = new Bundle(bundle, UA2ColoHelper);
@@ -272,8 +278,8 @@ public class NewPrismProcessUpdateTest {
             String oldName = new String(UA2Bundle.getProcessObject().getName());
             UA2Bundle.setProcessName("myNewProcessName");
 
-            
-            
+
+
             //now to update
             ServiceResponse response = prismHelper.getProcessHelper().update((UA2Bundle.getProcessData()), UA2Bundle.getProcessData());
             Util.assertFailed(response);
@@ -353,7 +359,7 @@ public class NewPrismProcessUpdateTest {
 
     }
 
-   
+
     @Test(dataProvider = "DP", groups = {"prism", "0.2"}, dataProviderClass = Bundle.class)
     @SuppressWarnings("SleepWhileInLoop")
     public void updateProcessIncreaseValidityInEachColoWithOneProcessRunning(Bundle bundle) throws Exception {
@@ -1054,13 +1060,13 @@ public class NewPrismProcessUpdateTest {
             UA2Bundle.addClusterToBundle(UA3Bundle.getClusters().get(0), ClusterType.TARGET);
             UA2Bundle.setProcessWorkflow("/examples/apps/phailFs/workflow.xml");
             usualGrind(UA3ColoHelper, UA2Bundle);
-            
+
                         final String START_TIME = instanceUtil.getTimeWrtSystemTime(-20);
 			String endTime = instanceUtil.getTimeWrtSystemTime(4000*60);
 			UA2Bundle.setProcessPeriodicity(1, TimeUnit.months);	
 			UA2Bundle.setOutputFeedPeriodicity(1, TimeUnit.months);
 			UA2Bundle.setProcessValidity(START_TIME, endTime);
-            
+
             //UA2Bundle.generateUniqueBundle();
             UA2Bundle.submitBundle(prismHelper);
             //now to schedule in 1 colo and let it remain in another
@@ -1073,7 +1079,7 @@ public class NewPrismProcessUpdateTest {
 
             //UA2Bundle.getProcessObject().setFrequency(getRandomFrequency(UA2Bundle));
             String updatedProcess =	instanceUtil.setProcessFrequency(UA2Bundle.getProcessData(),new Frequency(5,TimeUnit.minutes));
-						
+
             Util.print("updated process: "+ updatedProcess);
 
             //now to update
@@ -1162,7 +1168,7 @@ public class NewPrismProcessUpdateTest {
 
     }
 
- 
+
 
     @Test(dataProvider = "DP", groups = {"prism", "0.2"}, dataProviderClass = Bundle.class)
     @SuppressWarnings("SleepWhileInLoop")
@@ -1189,7 +1195,7 @@ public class NewPrismProcessUpdateTest {
             String oldStartTime=instanceUtil.dateToOozieDate(UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getStart());
             String newStartTime = instanceUtil.addMinsToTime(instanceUtil.dateToOozieDate(UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getStart()), -3);
             UA2Bundle.setProcessValidity(newStartTime,instanceUtil.dateToOozieDate( UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getEnd()));
-            
+
             waitForProcessToReachACertainState(UA3ColoHelper, UA2Bundle, "RUNNING");
 
             Util.assertSucceeded(prismHelper.getProcessHelper().update(UA2Bundle.getProcessData(), UA2Bundle.getProcessData()));
@@ -1238,13 +1244,13 @@ public class NewPrismProcessUpdateTest {
             String oldStartTime=instanceUtil.dateToOozieDate(UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getStart());
             String newStartTime = instanceUtil.addMinsToTime(instanceUtil.dateToOozieDate(UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getStart()), 3);
             UA2Bundle.setProcessValidity(newStartTime, instanceUtil.dateToOozieDate(UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getEnd()));
-            
+
             waitForProcessToReachACertainState(UA3ColoHelper, UA2Bundle, "RUNNING");
 
             Util.assertSucceeded(UA3ColoHelper.getProcessHelper().suspend(URLS.SUSPEND_URL, UA2Bundle.getProcessData()));
-            
-            
-            
+
+
+
             Util.assertSucceeded(prismHelper.getProcessHelper().update(UA2Bundle.getProcessData(), UA2Bundle.getProcessData()));
 
 
@@ -1268,7 +1274,7 @@ public class NewPrismProcessUpdateTest {
             int finalNumberOfInstances = instanceUtil.getProcessInstanceListFromAllBundles(UA3ColoHelper, Util.getProcessName(UA2Bundle.getProcessData()), "PROCESS").size();
             Assert.assertEquals(finalNumberOfInstances,getExpectedNumberOfWorkflowInstances(oldStartTime,UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getEnd()));
             Assert.assertEquals(instanceUtil.getProcessInstanceList(UA3ColoHelper,Util.readEntityName(UA2Bundle.getProcessData()),"PROCESS").size(),getExpectedNumberOfWorkflowInstances(newStartTime, UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getEnd()));
-            
+
             Util.verifyNoJobsFoundInOozie(Util.getOozieJobStatus(UA2ColoHelper, Util.readEntityName(UA2Bundle.getProcessData()), "RUNNING"));
         } finally {
             UA1Bundle.deleteBundle(prismHelper);
@@ -1300,7 +1306,7 @@ public class NewPrismProcessUpdateTest {
             String oldStartTime=instanceUtil.dateToOozieDate(UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getStart());
             String newStartTime = instanceUtil.addMinsToTime(instanceUtil.dateToOozieDate(UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getStart()), -3);
             UA2Bundle.setProcessValidity(newStartTime, instanceUtil.dateToOozieDate(UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getEnd()));
-            
+
             waitForProcessToReachACertainState(UA3ColoHelper, UA2Bundle, "RUNNING");
 
             Util.assertSucceeded(UA3ColoHelper.getProcessHelper().suspend(URLS.SUSPEND_URL, UA2Bundle.getProcessData()));
@@ -1328,7 +1334,7 @@ public class NewPrismProcessUpdateTest {
             //ensure that the running process has new coordinators created; while the submitted one is updated correctly.
             //int finalNumberOfInstances=instanceUtil.getProcessInstanceListFromAllBundles(UA3ColoHelper, Util.getProcessName(UA2Bundle.getProcessData()), "PROCESS").size();
             //Assert.assertEquals(finalNumberOfInstances,getExpectedNumberOfWorkflowInstances(oldStartTime,UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getEnd()));
-            
+
             int finalNumberOfInstances = instanceUtil.getProcessInstanceListFromAllBundles(UA3ColoHelper, Util.getProcessName(UA2Bundle.getProcessData()), "PROCESS").size();
             Assert.assertEquals(finalNumberOfInstances,getExpectedNumberOfWorkflowInstances(newStartTime,UA2Bundle.getProcessObject().getClusters().getCluster().get(0).getValidity().getEnd()));
             Util.verifyNoJobsFoundInOozie(Util.getOozieJobStatus(UA2ColoHelper, Util.readEntityName(UA2Bundle.getProcessData()), "RUNNING"));
@@ -1339,234 +1345,250 @@ public class NewPrismProcessUpdateTest {
 
         }
     }
+	
 
-    private void submitClusters(Bundle bundle) throws Exception {
-        for (String cluster : bundle.getClusters()) {
-            System.out.println("will submit: " + cluster);
-            Util.assertSucceeded(prismHelper.getClusterHelper().submitEntity(Util.URLS.SUBMIT_URL, cluster));
-        }
-    }
 
-    private void submitProcess(Bundle bundle) throws Exception {
-        submitClusters(bundle);
-        for (String feed : bundle.getDataSets()) {
-            System.out.println(feed);
-            Util.assertSucceeded(prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed));
-        }
+	private String setProcessTimeOut(String process,int mag, TimeUnit unit) throws  Exception{
 
-        Util.assertSucceeded(prismHelper.getProcessHelper().submitEntity(Util.URLS.SUBMIT_URL, bundle.getProcessData()));
-    }
+		Process p = instanceUtil.getProcessElement(process);
 
-    private void submitAndScheduleProcess(Bundle bundle) throws Exception {
-        submitProcess(bundle);
-        Util.assertSucceeded(prismHelper.getProcessHelper().schedule(Util.URLS.SCHEDULE_URL, bundle.getProcessData()));
-    }
 
-    public ServiceResponse updateProcessConcurrency(Bundle bundle, int concurrency) throws Exception {
-        String oldData = new String(bundle.getProcessData());
-        com.inmobi.qa.airavatqa.generated.process.Process updatedProcess = bundle.getProcessObject();
-        updatedProcess.setParallel(concurrency);
+		//TimeUnit b;
 
-        return prismHelper.getProcessHelper().update(oldData, prismHelper.getProcessHelper().toString(updatedProcess));
-    }
+		Frequency f = new Frequency(mag,unit);
 
-    private String dualComparison(Bundle bundle, ColoHelper coloHelper) throws Exception {
-        Assert.assertEquals(getResponse(prismHelper, bundle), getResponse(coloHelper, bundle));
-        return getResponse(prismHelper, bundle);
-    }
+		p.setTimeout(f);
+		return instanceUtil.processToString(p);
+	}
 
-    private void dualComparisonFailure(Bundle bundle, ColoHelper coloHelper) throws Exception {
-        Assert.assertNotSame(getResponse(prismHelper, bundle), getResponse(coloHelper, bundle));
 
-    }
+	private void submitClusters(Bundle bundle) throws Exception {
+		for (String cluster : bundle.getClusters()) {
+			System.out.println("will submit: " + cluster);
+			Util.assertSucceeded(prismHelper.getClusterHelper().submitEntity(Util.URLS.SUBMIT_URL, cluster));
+		}
+	}
 
-    private String getResponse(PrismHelper prismHelper, Bundle bundle) throws Exception {
-        //        ServiceResponse response=prismHelper.getProcessHelper().getEntityDefinition(Util.URLS.GET_ENTITY_DEFINITION,bundle.getProcessData());
-        //        APIResult result=Util.parseResponse(response);
-        //        
-        //        Assert.assertNotNull(result.getMessage());
-        //        return result.getMessage();
-        ServiceResponse response = prismHelper.getProcessHelper().getEntityDefinition(Util.URLS.GET_ENTITY_DEFINITION, bundle.getProcessData());
-        Util.assertSucceeded(response);
-        String result = response.getMessage();
-        Assert.assertNotNull(result);
+	private void submitProcess(Bundle bundle) throws Exception {
+		submitClusters(bundle);
+		for (String feed : bundle.getDataSets()) {
+			System.out.println(feed);
+			Util.assertSucceeded(prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed));
+		}
 
-        return result;
+		Util.assertSucceeded(prismHelper.getProcessHelper().submitEntity(Util.URLS.SUBMIT_URL, bundle.getProcessData()));
+	}
 
-    }
+	private void submitAndScheduleProcess(Bundle bundle) throws Exception {
+		submitProcess(bundle);
+		Util.assertSucceeded(prismHelper.getProcessHelper().schedule(Util.URLS.SCHEDULE_URL, bundle.getProcessData()));
+	}
 
-    private void verifyNewBundleCreation(ColoHelper coloHelper, String originalBundleId, int originalBundleCount, String processName, boolean shouldBeCreated) throws Exception {
-        String newBundleId = instanceUtil.getLatestBundleID(coloHelper, processName, "PROCESS");
-        if (shouldBeCreated) {
-            Assert.assertTrue(!newBundleId.equalsIgnoreCase(originalBundleId), "eeks! new bundle is not getting created!!!!");
-            System.out.println("old bundleId=" + originalBundleId);
-            System.out.println("new bundleId=" + newBundleId);
-            //Util.validateNumberOfWorkflowInstances(prismHelper,originalBundleCount, newBundleId, newBundleId);
-        } else {
-            Assert.assertEquals(newBundleId, originalBundleId, "eeks! new bundle is getting created!!!!");
+	public ServiceResponse updateProcessConcurrency(Bundle bundle, int concurrency) throws Exception {
+		String oldData = new String(bundle.getProcessData());
+		Process updatedProcess = bundle.getProcessObject();
+		updatedProcess.setParallel(concurrency);
 
-        }
+		return prismHelper.getProcessHelper().update(oldData, prismHelper.getProcessHelper().toString(updatedProcess));
+	}
 
-    }
+	private String dualComparison(Bundle bundle, ColoHelper coloHelper) throws Exception {
+		AssertJUnit.assertEquals(getResponse(prismHelper, bundle), getResponse(coloHelper, bundle));
+		return getResponse(prismHelper, bundle);
+	}
 
-    private void waitForProcessToReachACertainState(ColoHelper coloHelper, Bundle bundle, String state) throws Exception {
-        
-        
-        
-        while (!Util.getOozieJobStatus(coloHelper, Util.readEntityName(bundle.getProcessData())).get(0).contains(state.toUpperCase()));
-        {
-            //keep waiting
-            Thread.sleep(10000);
-            
-        }
+	private void dualComparisonFailure(Bundle bundle, ColoHelper coloHelper) throws Exception {
+		AssertJUnit.assertNotSame(getResponse(prismHelper, bundle), getResponse(coloHelper, bundle));
 
-        //now check if the coordinator is in desired state
-        CoordinatorJob coord=getDefaultOozieCoord(coloHelper,instanceUtil.getLatestBundleID(coloHelper,Util.readEntityName(bundle.getProcessData()),"PROCESS"));
-        
-        while(!coord.getStatus().equals(Status.valueOf(state.toUpperCase())))
-        {
-           coord=getDefaultOozieCoord(coloHelper,instanceUtil.getLatestBundleID(coloHelper,Util.readEntityName(bundle.getProcessData()),"PROCESS")); 
-        }
-    }
+	}
 
-    private Bundle usualGrind(PrismHelper prismHelper, Bundle b) throws Exception {
-        System.setProperty("java.security.krb5.realm", "");
-        System.setProperty("java.security.krb5.kdc", "");
+	private String getResponse(PrismHelper prismHelper, Bundle bundle) throws Exception {
+		//        ServiceResponse response=prismHelper.getProcessHelper().getEntityDefinition(Util.URLS.GET_ENTITY_DEFINITION,bundle.getProcessData());
+		//        APIResult result=Util.parseResponse(response);
+		//        
+		//        Assert.assertNotNull(result.getMessage());
+		//        return result.getMessage();
+		ServiceResponse response = prismHelper.getProcessHelper().getEntityDefinition(Util.URLS.GET_ENTITY_DEFINITION, bundle.getProcessData());
+		Util.assertSucceeded(response);
+		String result = response.getMessage();
+		Assert.assertNotNull(result);
 
-        b.setInputFeedDataPath("/samarthUpdate/input-data/rawLogs/oozieExample/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+		return result;
 
-        String prefix = b.getFeedDataPathPrefix();
-        Util.HDFSCleanup(prismHelper, prefix.substring(1));
-        Util.lateDataReplenish(prismHelper, 100, 0, 1, prefix);
-        final String START_TIME = instanceUtil.getTimeWrtSystemTime(-5);
-        String endTime = instanceUtil.getTimeWrtSystemTime(6);
-        b.setProcessPeriodicity(1, TimeUnit.minutes);
-        b.setOutputFeedPeriodicity(1, TimeUnit.minutes);
-        b.setProcessValidity(START_TIME, endTime);
-        return b;
-    }
+	}
 
-    private ExecutionType getRandomExecutionType(Bundle bundle) throws Exception {
-        ExecutionType current = bundle.getProcessObject().getOrder();
+	private void verifyNewBundleCreation(ColoHelper coloHelper, String originalBundleId, int originalBundleCount, String processName, boolean shouldBeCreated) throws Exception {
+		String newBundleId = instanceUtil.getLatestBundleID(coloHelper, processName, "PROCESS");
+		if (shouldBeCreated) {
+			Assert.assertTrue(!newBundleId.equalsIgnoreCase(originalBundleId), "eeks! new bundle is not getting created!!!!");
+			System.out.println("old bundleId=" + originalBundleId);
+			System.out.println("new bundleId=" + newBundleId);
+			//Util.validateNumberOfWorkflowInstances(prismHelper,originalBundleCount, newBundleId, newBundleId);
+		} else {
+			AssertJUnit.assertEquals(newBundleId, originalBundleId, "eeks! new bundle is getting created!!!!");
 
-        Random r = new Random();
-        ExecutionType[] values = ExecutionType.values();
-        int i = 0;
+		}
 
-        do {
+	}
 
-            i = r.nextInt(values.length);
+	private void waitForProcessToReachACertainState(ColoHelper coloHelper, Bundle bundle, String state) throws Exception {
 
-        } while (current.equals(values[i]));
-        return values[i];
 
-    }
 
-    public ServiceResponse updateProcessFrequency(Bundle bundle, Frequency frequency) throws Exception {
-        String oldData = new String(bundle.getProcessData());
-        com.inmobi.qa.airavatqa.generated.process.Process updatedProcess = bundle.getProcessObject();
-        updatedProcess.setFrequency(frequency);
+		while (!Util.getOozieJobStatus(coloHelper, Util.readEntityName(bundle.getProcessData())).get(0).contains(state.toUpperCase()));
+		{
+			//keep waiting
+			Thread.sleep(10000);
 
-        return prismHelper.getProcessHelper().update(oldData, prismHelper.getProcessHelper().toString(updatedProcess));
-    }
+		}
 
-    //need to expand this function more later
-    private int getExpectedNumberOfWorkflowInstances(String start, String end) throws Exception {
+		//now check if the coordinator is in desired state
+		CoordinatorJob coord=getDefaultOozieCoord(coloHelper,instanceUtil.getLatestBundleID(coloHelper,Util.readEntityName(bundle.getProcessData()),"PROCESS"));
 
-        DateTime startDate = new DateTime(start);
-        DateTime endDate = new DateTime(end);
-        Minutes minutes = Minutes.minutesBetween((startDate), (endDate));
-        return minutes.getMinutes();
-    }
+		while(!coord.getStatus().equals(Status.valueOf(state.toUpperCase())))
+		{
+			coord=getDefaultOozieCoord(coloHelper,instanceUtil.getLatestBundleID(coloHelper,Util.readEntityName(bundle.getProcessData()),"PROCESS")); 
+		}
+	}
 
-    private int getExpectedNumberOfWorkflowInstances(Date start, Date end) throws Exception {
+	private Bundle usualGrind(PrismHelper prismHelper, Bundle b) throws Exception {
+		System.setProperty("java.security.krb5.realm", "");
+		System.setProperty("java.security.krb5.kdc", "");
 
-        DateTime startDate = new DateTime(start);
-        DateTime endDate = new DateTime(end);
-        Minutes minutes = Minutes.minutesBetween((startDate), (endDate));
-        return minutes.getMinutes();
-    }
-    
-    private int getExpectedNumberOfWorkflowInstances(String start, Date end) throws Exception {
+		b.setInputFeedDataPath("/samarthUpdate/input-data/rawLogs/oozieExample/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
 
-        DateTime startDate = new DateTime(start);
-        DateTime endDate = new DateTime(end);
-        Minutes minutes = Minutes.minutesBetween((startDate), (endDate));
-        return minutes.getMinutes();
-    }
-    
-    private Frequency getRandomFrequency(Bundle bundle) throws Exception {
-        Frequency current = bundle.getProcessObject().getFrequency();
+		String prefix = b.getFeedDataPathPrefix();
+		Util.HDFSCleanup(prismHelper, prefix.substring(1));
+		Util.lateDataReplenish(prismHelper, 100, 0, 1, prefix);
+		final String START_TIME = instanceUtil.getTimeWrtSystemTime(-5);
+		String endTime = instanceUtil.getTimeWrtSystemTime(6);
+		b.setProcessPeriodicity(1, TimeUnit.minutes);
+		b.setOutputFeedPeriodicity(1, TimeUnit.minutes);
+		b.setProcessValidity(START_TIME, endTime);
+		return b;
+	}
 
-        Random r = new Random();
-        TimeUnit[] values = TimeUnit.values();
-        int i = 0;
+	private ExecutionType getRandomExecutionType(Bundle bundle) throws Exception {
+		ExecutionType current = bundle.getProcessObject().getOrder();
 
-        do {
+		Random r = new Random();
+		ExecutionType[] values = ExecutionType.values();
+		int i = 0;
 
-            i = r.nextInt(values.length);
+		do {
 
-        } while (current.getTimeUnit().equals(values[i]));
+			i = r.nextInt(values.length);
 
-        return new Frequency(current.getFrequency() + 1, values[i]);
+		} while (current.equals(values[i]));
+		return values[i];
 
-    }
+	}
 
-    private void waitingForBundleFinish(ColoHelper coloHelper, String bundleId) throws Exception {
-        int wait = 0;
-        while (!Util.isBundleOver(coloHelper, bundleId)) {
-            //keep waiting
-            Thread.sleep(60000);
-            wait++;
-            if (wait == 15) {
-                break;
-            }
-        }
-    }
-    //        private void waitTillCertainPercentageOfProcessIsOver(ColoHelper coloHelper,String bundleId,int percentage) throws Exception
-    //        {
-    //            
-    //            CoordinatorJob defaultCoordinator=getDefaultOozieCoord(coloHelper,bundleId);
-    //            
-    //            while(defaultCoordinator.getStatus().equals(CoordinatorJob.Status.PREP))
-    //            {
-    //                defaultCoordinator=getDefaultOozieCoord(bundleId);
-    //            }
-    //            
-    //            int totalCount=defaultCoordinator.getActions().size();
-    //            
-    //            int percentageConversion=(percentage*totalCount)/100;
-    //            
-    //            while(true && percentageConversion>0)
-    //            {
-    //                int doneBynow=0;
-    //                for(CoordinatorAction action:defaultCoordinator.getActions())
-    //                {
-    //                   CoordinatorAction actionInfo=getOozieActionInfo(action.getId());
-    //                   if(actionInfo.getStatus().equals(CoordinatorAction.Status.SUCCEEDED) || actionInfo.getStatus().equals(CoordinatorAction.Status.FAILED) || actionInfo.getStatus().equals(CoordinatorAction.Status.KILLED) || actionInfo.getStatus().equals(CoordinatorAction.Status.TIMEDOUT))
-    //                   {
-    //                       doneBynow++;
-    //                       if(doneBynow==percentageConversion)
-    //                       {
-    //                          return; 
-    //                       }
-    //                   }
-    //                }
-    //            }
-    //        }
-    
-private CoordinatorJob getDefaultOozieCoord(ColoHelper coloHelper,String bundleId) throws Exception
-        {
-           XOozieClient client=new XOozieClient(coloHelper.getFeedHelper().getOozieURL());
-           BundleJob bundlejob=client.getBundleJobInfo(bundleId); 
-           
-           for(CoordinatorJob coord:bundlejob.getCoordinators())
-           {
-               if(coord.getAppName().contains("DEFAULT"))
-               {
-                    return client.getCoordJobInfo(coord.getId());
-               }
-           }
-           return null;
-        }        
+	public ServiceResponse updateProcessFrequency(Bundle bundle, com.inmobi.qa.ivory.generated.dependencies.Frequency frequency) throws Exception {
+		String oldData = new String(bundle.getProcessData());
+		Process updatedProcess = bundle.getProcessObject();
+		updatedProcess.setFrequency(frequency);
+
+		return prismHelper.getProcessHelper().update(oldData, prismHelper.getProcessHelper().toString(updatedProcess));
+	}
+
+	//need to expand this function more later
+	private int getExpectedNumberOfWorkflowInstances(String start, String end) throws Exception {
+
+		DateTime startDate = new DateTime(start);
+		DateTime endDate = new DateTime(end);
+		Minutes minutes = Minutes.minutesBetween((startDate), (endDate));
+		return minutes.getMinutes();
+	}
+
+	private int getExpectedNumberOfWorkflowInstances(Date start, Date end) throws Exception {
+
+		DateTime startDate = new DateTime(start);
+		DateTime endDate = new DateTime(end);
+		Minutes minutes = Minutes.minutesBetween((startDate), (endDate));
+		return minutes.getMinutes();
+	}
+
+	private int getExpectedNumberOfWorkflowInstances(String start, Date end) throws Exception {
+
+		DateTime startDate = new DateTime(start);
+		DateTime endDate = new DateTime(end);
+		Minutes minutes = Minutes.minutesBetween((startDate), (endDate));
+		return minutes.getMinutes();
+	}
+
+	private Frequency getRandomFrequency(Bundle bundle) throws Exception {
+		com.inmobi.qa.ivory.generated.dependencies.Frequency current = bundle.getProcessObject().getFrequency();
+
+		Random r = new Random();
+		TimeUnit[] values = TimeUnit.values();
+		int i = 0;
+
+		do {
+
+			i = r.nextInt(values.length);
+
+		} while (current.getTimeUnit().equals(values[i]));
+
+		return new Frequency(current.getFrequency() + 1, values[i]);
+
+	}
+
+	private void waitingForBundleFinish(ColoHelper coloHelper, String bundleId) throws Exception {
+		int wait = 0;
+		while (!Util.isBundleOver(coloHelper, bundleId)) {
+			//keep waiting
+			Thread.sleep(60000);
+			wait++;
+			if (wait == 15) {
+				break;
+			}
+		}
+	}
+	//        private void waitTillCertainPercentageOfProcessIsOver(ColoHelper coloHelper,String bundleId,int percentage) throws Exception
+	//        {
+	//            
+	//            CoordinatorJob defaultCoordinator=getDefaultOozieCoord(coloHelper,bundleId);
+	//            
+	//            while(defaultCoordinator.getStatus().equals(CoordinatorJob.Status.PREP))
+	//            {
+	//                defaultCoordinator=getDefaultOozieCoord(bundleId);
+	//            }
+	//            
+	//            int totalCount=defaultCoordinator.getActions().size();
+	//            
+	//            int percentageConversion=(percentage*totalCount)/100;
+	//            
+	//            while(true && percentageConversion>0)
+	//            {
+	//                int doneBynow=0;
+	//                for(CoordinatorAction action:defaultCoordinator.getActions())
+	//                {
+	//                   CoordinatorAction actionInfo=getOozieActionInfo(action.getId());
+	//                   if(actionInfo.getStatus().equals(CoordinatorAction.Status.SUCCEEDED) || actionInfo.getStatus().equals(CoordinatorAction.Status.FAILED) || actionInfo.getStatus().equals(CoordinatorAction.Status.KILLED) || actionInfo.getStatus().equals(CoordinatorAction.Status.TIMEDOUT))
+	//                   {
+	//                       doneBynow++;
+	//                       if(doneBynow==percentageConversion)
+	//                       {
+	//                          return; 
+	//                       }
+	//                   }
+	//                }
+	//            }
+	//        }
+
+	private CoordinatorJob getDefaultOozieCoord(ColoHelper coloHelper,String bundleId) throws Exception
+	{
+		XOozieClient client=new XOozieClient(coloHelper.getFeedHelper().getOozieURL());
+		BundleJob bundlejob=client.getBundleJobInfo(bundleId); 
+
+		for(CoordinatorJob coord:bundlejob.getCoordinators())
+		{
+			if(coord.getAppName().contains("DEFAULT"))
+			{
+				return client.getCoordJobInfo(coord.getId());
+			}
+		}
+		return null;
+	}        
 }

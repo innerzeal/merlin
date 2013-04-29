@@ -23,7 +23,7 @@
     </partitions>
 <!--
     <groups>online,bi</groups>-->
-
+<availabilityFlag>_SUCCESS</availabilityFlag>
     <frequency>minutes(20)</frequency>
     <timezone>UTC</timezone>
     <late-arrival cut-off="hours(6)" />

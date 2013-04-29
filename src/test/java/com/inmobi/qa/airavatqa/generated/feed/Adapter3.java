@@ -9,9 +9,10 @@
 package com.inmobi.qa.airavatqa.generated.feed;
 
 import java.util.TimeZone;
+
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import com.inmobi.qa.airavatqa.core.SchemaHelper;
+import com.inmobi.qa.ivory.generated.dependencies.SchemaHelper;
 
 public class Adapter3
     extends XmlAdapter<String, TimeZone>
