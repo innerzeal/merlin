@@ -11,20 +11,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ColoHelper;
-import com.inmobi.qa.airavatqa.core.ENTITY_TYPE;
-import com.inmobi.qa.airavatqa.core.EntityHelperFactory;
-import com.inmobi.qa.airavatqa.core.PrismHelper;
-import org.apache.ivory.entity.v0.Frequency.TimeUnit;
-import com.inmobi.qa.airavatqa.core.ProcessInstancesResult.WorkflowStatus;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.core.instanceUtil;
-import com.inmobi.qa.airavatqa.core.Util.URLS;
-import com.inmobi.qa.airavatqa.interfaces.entity.IEntityManagerHelper;
-import com.inmobi.qa.airavatqa.core.ProcessInstancesResult;
-import org.testng.annotations.AfterGroups;
-import org.testng.annotations.BeforeGroups;
+import com.inmobi.qa.ivory.bundle.Bundle;
+import com.inmobi.qa.ivory.generated.dependencies.Frequency.TimeUnit;
+import com.inmobi.qa.ivory.helpers.ColoHelper;
+import com.inmobi.qa.ivory.helpers.PrismHelper;
+import com.inmobi.qa.ivory.response.ProcessInstancesResult;
+import com.inmobi.qa.ivory.response.ProcessInstancesResult.WorkflowStatus;
+import com.inmobi.qa.ivory.util.Util;
+import com.inmobi.qa.ivory.util.Util.URLS;
+import com.inmobi.qa.ivory.util.instanceUtil;
 /**
  * 
  * @author samarth.gupta
@@ -118,7 +113,7 @@ public class ProcessInstanceRunningTest {
 			b.setCLusterColo("ua2");
 			b.setInputFeedDataPath("/samarthData/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
 			b.setProcessValidity("2010-01-02T01:00Z","2010-01-02T02:30Z");
-			b.setProcessPeriodicity(5,org.apache.ivory.entity.v0.Frequency.TimeUnit.minutes);
+			b.setProcessPeriodicity(5,TimeUnit.minutes);
 			b.submitAndScheduleBundle(prismHelper);
 			Thread.sleep(5000);
 			ProcessInstancesResult r  = prismHelper.getProcessHelper().getRunningInstance(URLS.INSTANCE_RUNNING,Util.readEntityName(b.getProcessData()));

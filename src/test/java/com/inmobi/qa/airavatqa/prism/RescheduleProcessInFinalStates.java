@@ -4,8 +4,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.ivory.entity.v0.Frequency.TimeUnit;
-import org.apache.oozie.client.CoordinatorAction;
 import org.apache.oozie.client.Job.Status;
 import org.joda.time.DateTime;
 import org.testng.Assert;
@@ -13,14 +11,16 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ColoHelper;
-import com.inmobi.qa.airavatqa.core.PrismHelper;
-import com.inmobi.qa.airavatqa.core.ProcessInstancesResult;
-import com.inmobi.qa.airavatqa.core.ServiceResponse;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.core.Util.URLS;
-import com.inmobi.qa.airavatqa.core.instanceUtil;
+import com.inmobi.qa.ivory.bundle.Bundle;
+import com.inmobi.qa.ivory.generated.dependencies.Frequency.TimeUnit;
+import com.inmobi.qa.ivory.helpers.ColoHelper;
+import com.inmobi.qa.ivory.helpers.PrismHelper;
+import com.inmobi.qa.ivory.response.ServiceResponse;
+import com.inmobi.qa.ivory.util.Util;
+import com.inmobi.qa.ivory.util.Util.URLS;
+import com.inmobi.qa.ivory.util.instanceUtil;
+
+
 
 public class RescheduleProcessInFinalStates {
 

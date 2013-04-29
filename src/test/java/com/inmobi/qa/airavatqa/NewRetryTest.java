@@ -4,24 +4,16 @@
  */
 package com.inmobi.qa.airavatqa;
 
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ColoHelper;
-import com.inmobi.qa.airavatqa.core.PrismHelper;
-import com.inmobi.qa.airavatqa.core.ProcessInstancesResult;
-import com.inmobi.qa.airavatqa.core.ServiceResponse;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.core.Util.URLS;
-import com.inmobi.qa.airavatqa.core.instanceUtil;
-import com.inmobi.qa.airavatqa.generated.process.PolicyType;
-import com.inmobi.qa.airavatqa.generated.process.Retry;
+
 
 import java.lang.reflect.Method;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.ivory.entity.v0.Frequency;
+
+import com.inmobi.qa.ivory.generated.dependencies.Frequency;
+//import org.apache.ivory.entity.v0.Frequency;
 import org.apache.oozie.client.BundleJob;
 import org.apache.oozie.client.CoordinatorAction;
 import org.apache.oozie.client.CoordinatorJob;
@@ -36,6 +28,18 @@ import org.testng.TestNGException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.inmobi.qa.ivory.bundle.Bundle;
+import com.inmobi.qa.ivory.generated.process.PolicyType;
+import com.inmobi.qa.ivory.generated.process.Retry;
+import com.inmobi.qa.ivory.helpers.ColoHelper;
+import com.inmobi.qa.ivory.helpers.PrismHelper;
+import com.inmobi.qa.ivory.response.ProcessInstancesResult;
+import com.inmobi.qa.ivory.response.ServiceResponse;
+import com.inmobi.qa.ivory.util.Util;
+import com.inmobi.qa.ivory.util.Util.URLS;
+import com.inmobi.qa.ivory.util.instanceUtil;
+import com.inmobi.qa.ivory.generated.process.Process;
 
 /**
  *
@@ -122,7 +126,7 @@ public class NewRetryTest {
 
             waitTillCertainPercentageOfProcessHasStarted(UA3ColoHelper,bundleId,25);
 
-            com.inmobi.qa.airavatqa.generated.process.Process oldProcessObject=bundle.getProcessObject();
+            Process oldProcessObject=bundle.getProcessObject();
             
             int defaultRetries=bundle.getProcessObject().getRetry().getAttempts(); 
             Retry retry=new Retry();
@@ -221,7 +225,7 @@ public class NewRetryTest {
                 //wait
             }
             
-            com.inmobi.qa.airavatqa.generated.process.Process oldProcessObject=bundle.getProcessObject();
+            Process oldProcessObject=bundle.getProcessObject();
 
             Retry retry=new Retry();
             retry=bundle.getProcessObject().getRetry();
@@ -324,7 +328,7 @@ public class NewRetryTest {
                 //wait
             }
             
-            com.inmobi.qa.airavatqa.generated.process.Process oldProcessObject=bundle.getProcessObject();
+            Process oldProcessObject=bundle.getProcessObject();
 
             Retry retry=new Retry();
             retry=bundle.getProcessObject().getRetry();
@@ -421,7 +425,7 @@ public class NewRetryTest {
                 //wait
             }
             
-            com.inmobi.qa.airavatqa.generated.process.Process oldProcessObject=bundle.getProcessObject();
+            Process oldProcessObject=bundle.getProcessObject();
 
             Retry retry=new Retry();
             retry=bundle.getProcessObject().getRetry();
@@ -512,7 +516,7 @@ public class NewRetryTest {
 
             waitTillCertainPercentageOfProcessHasStarted(UA3ColoHelper,bundleId,25);
 
-            com.inmobi.qa.airavatqa.generated.process.Process oldProcessObject=bundle.getProcessObject();
+            Process oldProcessObject=bundle.getProcessObject();
 
             Retry retry=new Retry();
             retry=bundle.getProcessObject().getRetry();
@@ -606,7 +610,7 @@ public class NewRetryTest {
 
             waitTillCertainPercentageOfProcessHasStarted(UA3ColoHelper,bundleId,25);
 
-            com.inmobi.qa.airavatqa.generated.process.Process oldProcessObject=bundle.getProcessObject();
+            Process oldProcessObject=bundle.getProcessObject();
 
             Retry retry=new Retry();
             retry=bundle.getProcessObject().getRetry();
@@ -698,7 +702,7 @@ public class NewRetryTest {
 
             waitTillCertainPercentageOfProcessHasStarted(UA3ColoHelper,bundleId,25);
 
-            com.inmobi.qa.airavatqa.generated.process.Process oldProcessObject=bundle.getProcessObject();
+            Process oldProcessObject=bundle.getProcessObject();
 
             Retry retry=new Retry();
             retry=bundle.getProcessObject().getRetry();
@@ -790,7 +794,7 @@ public class NewRetryTest {
 
             waitTillCertainPercentageOfProcessHasStarted(UA3ColoHelper,bundleId,25);
 
-            com.inmobi.qa.airavatqa.generated.process.Process oldProcessObject=bundle.getProcessObject();
+            Process oldProcessObject=bundle.getProcessObject();
 
             Retry retry=new Retry();
             retry=bundle.getProcessObject().getRetry();

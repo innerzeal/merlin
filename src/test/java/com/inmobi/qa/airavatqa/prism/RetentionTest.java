@@ -4,15 +4,7 @@
  */
 package com.inmobi.qa.airavatqa.prism;
 
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ColoHelper;
-import com.inmobi.qa.airavatqa.core.PrismHelper;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.core.Util.URLS;
-import com.inmobi.qa.airavatqa.generated.feed.Feed;
-import com.inmobi.qa.airavatqa.generated.feed.Location;
-import com.inmobi.qa.airavatqa.generated.feed.LocationType;
-import com.inmobi.qa.airavatqa.mq.Consumer;
+
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -25,6 +17,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.inmobi.qa.ivory.bundle.Bundle;
+import com.inmobi.qa.ivory.generated.feed.Feed;
+import com.inmobi.qa.ivory.generated.feed.LocationType;
+import com.inmobi.qa.ivory.helpers.ColoHelper;
+import com.inmobi.qa.ivory.helpers.PrismHelper;
+import com.inmobi.qa.ivory.supportClasses.Consumer;
+import com.inmobi.qa.ivory.util.Util;
+import com.inmobi.qa.ivory.util.Util.URLS;
 
 /**
  *
@@ -152,7 +153,7 @@ public class RetentionTest {
 		Feed feedObject=(Feed)feedContext.createUnmarshaller().unmarshal(new StringReader(feed));
 
 		//set the value
-		for(Location location: feedObject.getLocations().getLocation())
+		for( com.inmobi.qa.ivory.generated.feed.Location location: feedObject.getLocations().getLocation())
 		{
 			if(location.getType().equals(LocationType.DATA))
 			{

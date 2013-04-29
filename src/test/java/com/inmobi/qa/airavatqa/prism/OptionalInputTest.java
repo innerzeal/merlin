@@ -5,12 +5,14 @@ import java.lang.reflect.Method;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ColoHelper;
-import com.inmobi.qa.airavatqa.core.ENTITY_TYPE;
-import com.inmobi.qa.airavatqa.core.PrismHelper;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.core.instanceUtil;
+import com.inmobi.qa.ivory.bundle.Bundle;
+import com.inmobi.qa.ivory.helpers.ColoHelper;
+import com.inmobi.qa.ivory.helpers.PrismHelper;
+import com.inmobi.qa.ivory.supportClasses.ENTITY_TYPE;
+import com.inmobi.qa.ivory.util.Util;
+import com.inmobi.qa.ivory.util.instanceUtil;
+
+
 
 public class OptionalInputTest {
 

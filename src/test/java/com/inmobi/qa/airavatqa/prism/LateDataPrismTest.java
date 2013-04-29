@@ -2,22 +2,16 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.inmobi.qa.airavatqa.prism;
+/*package com.inmobi.qa.airavatqa.prism;
 
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ColoHelper;
-import com.inmobi.qa.airavatqa.core.PrismHelper;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.core.Util.URLS;
-import com.inmobi.qa.airavatqa.core.instanceUtil;
-import com.inmobi.qa.airavatqa.generated.process.LateProcess;
-import com.inmobi.qa.airavatqa.generated.process.PolicyType;
-import com.inmobi.qa.airavatqa.mq.Consumer;
+
+
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.oozie.client.BundleJob;
 import org.apache.oozie.client.CoordinatorAction;
@@ -35,10 +29,18 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-/**
+import com.inmobi.qa.airavatqa.mq.Consumer;
+import com.inmobi.qa.ivory.bundle.Bundle;
+import com.inmobi.qa.ivory.generated.process.PolicyType;
+import com.inmobi.qa.ivory.helpers.ColoHelper;
+import com.inmobi.qa.ivory.helpers.PrismHelper;
+import com.inmobi.qa.ivory.util.Util;
+import com.inmobi.qa.ivory.util.Util.URLS;
+
+
  *
  * @author rishu.mehrotra
- */ 
+ 
 public class LateDataPrismTest {
     
 	
@@ -212,7 +214,7 @@ public class LateDataPrismTest {
             
         }
     } 
-    
+    */
     
   /*  
     @Test(groups = {"0.2"},dataProvider="DP",priority=-20)
@@ -2020,7 +2022,7 @@ public class LateDataPrismTest {
         }
     }    
     
-    */
+    
 
     private void parseConsumerOutput(ColoHelper coloHelper,com.inmobi.qa.airavatqa.generated.process.Process processObject,List<HashMap<String,String>> consumerData,int expectedSize,String insertionFolder,int expectedCountForEachInstance) throws Exception
     {
@@ -2198,3 +2200,4 @@ public class LateDataPrismTest {
     
     
 }
+*/

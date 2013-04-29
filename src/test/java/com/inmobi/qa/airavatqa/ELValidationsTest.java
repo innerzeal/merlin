@@ -5,8 +5,10 @@ import java.lang.reflect.Method;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import com.inmobi.qa.airavatqa.core.ELUtil;
-import com.inmobi.qa.airavatqa.core.Util;
+
+import com.inmobi.qa.ivory.util.ELUtil;
+import com.inmobi.qa.ivory.util.Util;
+
 
 
 /**

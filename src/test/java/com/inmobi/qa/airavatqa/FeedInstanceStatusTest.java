@@ -6,17 +6,19 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ColoHelper;
-import com.inmobi.qa.airavatqa.core.PrismHelper;
-import com.inmobi.qa.airavatqa.core.ProcessInstancesResult;
-import com.inmobi.qa.airavatqa.core.ServiceResponse;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.core.Util.URLS;
-import com.inmobi.qa.airavatqa.core.instanceUtil;
-import com.inmobi.qa.airavatqa.core.xmlUtil;
-import com.inmobi.qa.airavatqa.generated.feed.ActionType;
-import com.inmobi.qa.airavatqa.generated.feed.ClusterType;
+import com.inmobi.qa.ivory.bundle.Bundle;
+import com.inmobi.qa.ivory.generated.feed.ActionType;
+import com.inmobi.qa.ivory.generated.feed.ClusterType;
+import com.inmobi.qa.ivory.helpers.ColoHelper;
+import com.inmobi.qa.ivory.helpers.PrismHelper;
+import com.inmobi.qa.ivory.response.ProcessInstancesResult;
+import com.inmobi.qa.ivory.response.ServiceResponse;
+import com.inmobi.qa.ivory.util.Util;
+import com.inmobi.qa.ivory.util.Util.URLS;
+import com.inmobi.qa.ivory.util.instanceUtil;
+import com.inmobi.qa.ivory.util.xmlUtil;
+
+
 
 public class FeedInstanceStatusTest {
 

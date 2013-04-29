@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.ivory.entity.v0.Frequency.TimeUnit;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -12,17 +11,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ColoHelper;
-import com.inmobi.qa.airavatqa.core.PrismHelper;
-import com.inmobi.qa.airavatqa.core.ProcessEntityHelperImpl;
-import com.inmobi.qa.airavatqa.core.ProcessInstancesResult;
-import com.inmobi.qa.airavatqa.core.ProcessInstancesResult.WorkflowStatus;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.core.Util.URLS;
-import com.inmobi.qa.airavatqa.core.instanceUtil;
-import org.testng.annotations.AfterGroups;
-import org.testng.annotations.BeforeGroups;
+import com.inmobi.qa.ivory.bundle.Bundle;
+import com.inmobi.qa.ivory.generated.dependencies.Frequency.TimeUnit;
+import com.inmobi.qa.ivory.helpers.ColoHelper;
+import com.inmobi.qa.ivory.helpers.PrismHelper;
+import com.inmobi.qa.ivory.response.ProcessInstancesResult;
+import com.inmobi.qa.ivory.response.ProcessInstancesResult.WorkflowStatus;
+import com.inmobi.qa.ivory.util.Util;
+import com.inmobi.qa.ivory.util.Util.URLS;
+import com.inmobi.qa.ivory.util.instanceUtil;
 
 /**
  * 

@@ -4,20 +4,22 @@
  */
 package com.inmobi.qa.airavatqa.prism;
 
-import com.inmobi.qa.airavatqa.core.APIResult;
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ColoHelper;
-import com.inmobi.qa.airavatqa.core.PrismHelper;
-import com.inmobi.qa.airavatqa.core.Util;
+
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import org.testng.Assert;
 import org.testng.TestNGException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.inmobi.qa.ivory.bundle.Bundle;
+import com.inmobi.qa.ivory.helpers.ColoHelper;
+import com.inmobi.qa.ivory.helpers.PrismHelper;
+import com.inmobi.qa.ivory.util.Util;
 
 /**
  *
