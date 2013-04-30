@@ -77,7 +77,7 @@ public class FeedStatusTest {
         Assert.assertTrue(response.getMessage().contains(colo+"/RUNNING"));
         //Assert.assertEquals(Util.message(response.getMessage(),"message"),(colo+"/RUNNING"));
         
-        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"RUNNING").get(0).contains("RUNNING"));
+        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"RUNNING",ivoryqa1).get(0).contains("RUNNING"));
         }
         catch(Exception e)
         {
@@ -115,7 +115,7 @@ public class FeedStatusTest {
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
         String colo=prismHelper.getFeedHelper().getColo();
         Assert.assertTrue(response.getMessage().contains(colo+"/SUSPENDED"));
-        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED").get(0).contains("SUSPENDED"));
+        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED",ivoryqa1).get(0).contains("SUSPENDED"));
         }
         catch(Exception e)
         {
@@ -148,7 +148,7 @@ public class FeedStatusTest {
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
         String colo=prismHelper.getFeedHelper().getColo();
         Assert.assertTrue(response.getMessage().contains(colo+"/SUBMITTED"));
-        //Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"RUNNING").get(0).contains("RUNNING"));
+        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"RUNNING",ivoryqa1).get(0).contains("RUNNING"));
         }
         catch(Exception e)
         {
@@ -183,7 +183,7 @@ public class FeedStatusTest {
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
         
         Assert.assertTrue(response.getMessage().contains(Util.getFeedName(feed)+" (FEED) not found"));
-        //Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"KILLED").get(0).contains("KILLED"));
+        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"KILLED",ivoryqa1).get(0).contains("KILLED"));
         }
         catch(Exception e)
         {

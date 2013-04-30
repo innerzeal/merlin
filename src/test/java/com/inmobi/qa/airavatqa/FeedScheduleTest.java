@@ -7,6 +7,7 @@ package com.inmobi.qa.airavatqa;
 import java.lang.reflect.Method;
 
 import org.testng.Assert;
+import org.testng.TestNGException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -25,141 +26,174 @@ import com.inmobi.qa.ivory.util.Util.URLS;
  * @author rishu.mehrotra
  */
 public class FeedScheduleTest {
+	PrismHelper prismHelper=new PrismHelper("prism.properties");
+	ColoHelper ivoryqa1 = new ColoHelper("ivoryqa-1.config.properties");
 	
-
+	
 	@BeforeMethod(alwaysRun=true)
 	public void testName(Method method)
 	{
 		Util.print("test name: "+method.getName());
 	}
 	
-    
+	
       IEntityManagerHelper feedHelper=EntityHelperFactory.getEntityHelper(ENTITY_TYPE.DATA);
       IEntityManagerHelper clusterHelper=EntityHelperFactory.getEntityHelper(ENTITY_TYPE.CLUSTER);
-      PrismHelper prismHelper=new PrismHelper("prism.properties");
-  	ColoHelper ivoryqa1 = new ColoHelper("ivoryqa-1.config.properties");
-    
-  	
-  	public void submitCluster(Bundle bundle) throws Exception
+      
+    public void submitCluster(Bundle bundle) throws Exception
     {
-       
-        bundle.submitClusters(prismHelper);
+        //submit the cluster
+        ServiceResponse response=clusterHelper.submitEntity(URLS.SUBMIT_URL,bundle.getClusterData());
+        Assert.assertEquals(Util.parseResponse(response).getStatusCode(),200);
+        Assert.assertNotNull(Util.parseResponse(response).getMessage());
     }
     
-    @Test(groups={"0.1","0.2"},dataProvider="DP",dataProviderClass=FeedSubmitTest.class)
-    public void scheduleValidFeed(Bundle bundle) throws Exception
+    @Test(groups={"0.1","0.2"})
+    public void scheduleValidFeed()
     {
+    	Bundle bundle = new Bundle();
         try
         {
         	
         	bundle = (Bundle)Util.readELBundles()[0][0];
-			bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
+        	bundle  = new Bundle(bundle,ivoryqa1.getEnvFileName());
             submitCluster(bundle);
             String feed=Util.getInputFeedFromBundle(bundle);
             //submit feed
-
-           bundle. submitFeeds(prismHelper);
+            ServiceResponse response=feedHelper.submitEntity(URLS.SUBMIT_URL,feed);
+            Util.assertSucceeded(response);
             //now schedule the thing
-            ServiceResponse response = bundle.getFeedHelper().schedule(URLS.SCHEDULE_URL,feed);
+            response=feedHelper.schedule(URLS.SCHEDULE_URL,feed);
             Util.assertSucceeded(response);
             
             Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"RUNNING",ivoryqa1).get(0).contains("RUNNING"));
         }
-       
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            throw new TestNGException(e.getMessage());
+        }
         finally {
             
-        	bundle.deleteBundle(prismHelper);
+            try{feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));}catch(Exception e){}
         }
     }
     
-   
-     
-    @Test(groups={"0.1","0.2"},dataProvider="DP",dataProviderClass=FeedSubmitTest.class)
-    public void scheduleKilledFeed(Bundle bundle) throws Exception
-    {
-        try {
-            
-        	bundle = (Bundle)Util.readELBundles()[0][0];
-			bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
-			submitCluster(bundle);
-            String feed=Util.getInputFeedFromBundle(bundle);
-            Util.assertSucceeded(prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed));
-            
-            //now suspend
-            Util.assertSucceeded(prismHelper.getFeedHelper().delete(URLS.DELETE_URL, feed));
-            Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"KILLED",ivoryqa1).get(0).contains("KILLED"));
-            
-            //now schedule this!
-            Util.assertFailed(prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed));
-            
-        }
-       
-        finally {
-            
-        	bundle.deleteBundle(prismHelper);
-        }
-    } 
     
-      
-    
-    @Test(groups={"0.1","0.2"},dataProvider="DP",dataProviderClass=FeedSubmitTest.class)
-    public void scheduleSuspendedFeed(Bundle bundle) throws Exception
+    @Test(groups={"0.1","0.2"})
+    public void scheduleAlreadyScheduledFeed()
     {
-        try {
-            
+    	Bundle bundle = new Bundle();
+        try
+        {
+        	
         	bundle = (Bundle)Util.readELBundles()[0][0];
-			bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
-			submitCluster(bundle);
-            String feed=Util.getInputFeedFromBundle(bundle);
-            Util.assertSucceeded(prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed));
-            
-            //now suspend
-            Util.assertSucceeded(prismHelper.getFeedHelper().suspend(URLS.SUSPEND_URL, feed));
-            Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED",ivoryqa1).get(0).contains("SUSPENDED"));
-            
-            //now schedule this!
-            Util.assertSucceeded((prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed)));
-            
-            Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED",ivoryqa1).get(0).contains("SUSPENDED"));
-
-        }
-      
-        finally {
-        	bundle.deleteBundle(prismHelper);
-
-        }
-    }
-  	
-  	
-    @Test(groups={"0.1","0.2"},dataProvider="DP",dataProviderClass=FeedSubmitTest.class)
-    public void scheduleAlreadyScheduledFeed(Bundle bundle) throws Exception
-    {
-        try {
-            
-        	bundle = (Bundle)Util.readELBundles()[0][0];
-			bundle = new Bundle(bundle,ivoryqa1.getEnvFileName());
-			submitCluster(bundle);
+        	bundle  = new Bundle(bundle,ivoryqa1.getEnvFileName());
+            submitCluster(bundle);
             String feed=Util.getInputFeedFromBundle(bundle);
             
-            ServiceResponse response=prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
+            ServiceResponse response=feedHelper.submitEntity(URLS.SUBMIT_URL, feed);
             Util.assertSucceeded(response);
             
-            response=prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed);
+            response=feedHelper.schedule(URLS.SCHEDULE_URL, feed);
             Util.assertSucceeded(response);
             
             Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"RUNNING",ivoryqa1).get(0).contains("RUNNING"));
             
             //now try re-scheduling again
-            response=prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed);
-            Util.assertSucceeded(response);
+            response=feedHelper.schedule(URLS.SCHEDULE_URL, feed);
+            Util.assertFailed(response);
             
         }
-       
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            throw new TestNGException(e.getMessage());
+        }
         finally {
-        	bundle.deleteBundle(prismHelper);
-        }               
+         
+            try {
+                
+                feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+            }
+            catch(Exception e){}
+        }
     }
-  	
+    
+    
+    @Test(groups={"0.1","0.2"})
+    public void scheduleSuspendedFeed() throws Exception
+    {
+    	Bundle bundle = new Bundle();
+        try
+        {
+        	
+        	bundle = (Bundle)Util.readELBundles()[0][0];
+        	bundle  = new Bundle(bundle,ivoryqa1.getEnvFileName());
+            submitCluster(bundle);
+            String feed=Util.getInputFeedFromBundle(bundle);
+            Util.assertSucceeded(feedHelper.submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed));
+            
+            //now suspend
+            Util.assertSucceeded(feedHelper.suspend(URLS.SUSPEND_URL, feed));
+            Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED",ivoryqa1).get(0).contains("SUSPENDED"));
+            
+            //now schedule this!
+            Util.assertFailed(feedHelper.schedule(URLS.SCHEDULE_URL, feed));
+            
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            throw new TestNGException(e.getMessage());
+        }
+        finally {
+            
+        }
+    }
+    
+    @Test(groups={"0.1","0.2"})
+    public void scheduleKilledFeed() throws Exception
+    {
+    	Bundle bundle = new Bundle();
+        try
+        {
+        	
+        	bundle = (Bundle)Util.readELBundles()[0][0];
+        	bundle  = new Bundle(bundle,ivoryqa1.getEnvFileName());
+            submitCluster(bundle);
+            String feed=Util.getInputFeedFromBundle(bundle);
+            Util.assertSucceeded(feedHelper.submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed));
+            
+            //now suspend
+            Util.assertSucceeded(feedHelper.delete(URLS.DELETE_URL, feed));
+            Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"KILLED",ivoryqa1).get(0).contains("KILLED"));
+            
+            //now schedule this!
+            Util.assertFailed(feedHelper.schedule(URLS.SCHEDULE_URL, feed));
+            
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            throw new TestNGException(e.getMessage());
+        }
+        finally {
+            
+            feedHelper.delete(URLS.DELETE_URL,Util.getInputFeedFromBundle(bundle));
+        }
+    }
+    
+    @Test(groups={"0.1","0.2"},dataProvider="DP",dataProviderClass=FeedSubmitTest.class)
+    public void scheduleNonExistentFeed(Bundle bundle) throws Exception
+    {
+        bundle.generateUniqueBundle();
+        submitCluster(bundle);
+        String feed=Util.getInputFeedFromBundle(bundle);
+        Util.assertFailed(feedHelper.schedule(URLS.SCHEDULE_URL,feed));
+    }
+    
+    
+      
+    
 }
-
-
