@@ -79,6 +79,33 @@ public class ProcessInstanceKillsTest {
 		Util.print("test name: "+method.getName());
 	}
 	
+
+	@Test(groups = { "0.1","0.2"})
+	public void testProcessInstanceKill_single() throws Exception
+	{       
+                
+		Bundle b = new Bundle();
+		try{
+
+			b = (Bundle)Util.readELBundles()[0][0];
+			b = new Bundle(b,ivoryqa1.getEnvFileName());
+			b.setInputFeedDataPath("/samarthData/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+			b.setProcessValidity("2010-01-02T01:00Z","2010-01-02T01:04Z");
+			b.setProcessPeriodicity(5,TimeUnit.minutes);
+			b.setOutputFeedPeriodicity(5,TimeUnit.minutes);
+			b.setOutputFeedLocationData("/examples/output-data/aggregator/aggregatedLogs/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+			b.setProcessConcurrency(1);
+			b.submitAndScheduleBundle(prismHelper);
+			Thread.sleep(15000);
+			ProcessInstancesResult r  =  prismHelper.getProcessHelper().getProcessInstanceKill(Util.readEntityName(b.getProcessData()),"?start=2010-01-02T01:00Z");
+			instanceUtil.validateSuccess(r, b, WorkflowStatus.KILLED);
+		}
+		finally{
+			b.deleteBundle(prismHelper);
+                        
+		}
+	}
+
 	
 	@Test(groups = { "0.1","0.2"})
 	public void testProcessInstanceKill_startAndEndSame() throws Exception
@@ -285,31 +312,6 @@ public class ProcessInstanceKillsTest {
 
 	
 	
-	@Test(groups = { "0.1","0.2"})
-	public void testProcessInstanceKill_single() throws Exception
-	{       
-                
-		Bundle b = new Bundle();
-		try{
-
-			b = (Bundle)Util.readELBundles()[0][0];
-			b = new Bundle(b,ivoryqa1.getEnvFileName());
-			b.setInputFeedDataPath("/samarthData/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
-			b.setProcessValidity("2010-01-02T01:00Z","2010-01-02T01:04Z");
-			b.setProcessPeriodicity(5,TimeUnit.minutes);
-			b.setOutputFeedPeriodicity(5,TimeUnit.minutes);
-			b.setOutputFeedLocationData("/examples/output-data/aggregator/aggregatedLogs/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
-			b.setProcessConcurrency(1);
-			b.submitAndScheduleBundle(prismHelper);
-			Thread.sleep(15000);
-			ProcessInstancesResult r  =  prismHelper.getProcessHelper().getProcessInstanceKill(Util.readEntityName(b.getProcessData()),"?start=2010-01-02T01:00Z");
-			instanceUtil.validateSuccess(r, b, WorkflowStatus.KILLED);
-		}
-		finally{
-			b.deleteBundle(prismHelper);
-                        
-		}
-	}
 	
 	@Test(groups = { "0.1","0.2"})
 	public void testProcessInstanceKill_suspended() throws Exception
