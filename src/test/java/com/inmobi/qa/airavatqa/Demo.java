@@ -1,21 +1,10 @@
 package com.inmobi.qa.airavatqa;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
+import com.inmobi.qa.ivory.interfaces.EntityHelperFactory;
+import com.inmobi.qa.ivory.interfaces.IEntityManagerHelper;
+import com.inmobi.qa.ivory.supportClasses.ENTITY_TYPE;
 
-import org.testng.Assert;
-import org.testng.TestNGException;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-import com.inmobi.qa.airavatqa.core.APIResult;
-import com.inmobi.qa.airavatqa.core.Bundle;
-import com.inmobi.qa.airavatqa.core.ENTITY_TYPE;
-import com.inmobi.qa.airavatqa.core.EntityHelperFactory;
-import com.inmobi.qa.airavatqa.core.ServiceResponse;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.core.Util.URLS;
-import com.inmobi.qa.airavatqa.interfaces.entity.IEntityManagerHelper;
 
 public class Demo {
 
