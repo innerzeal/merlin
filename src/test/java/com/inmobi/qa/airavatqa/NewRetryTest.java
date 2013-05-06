@@ -1462,6 +1462,7 @@ public class NewRetryTest {
                 Thread.sleep(1000);
                 System.out.println("desired state not reached.This was attempt number: "+attempt);
                 attempt++;
+                Thread.sleep(5000);
             }
        }
        Assert.assertTrue(result,"all retries were not attempted correctly!");
