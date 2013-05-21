@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 package com.inmobi.qa.airavatqa;
-
+/*
 import com.inmobi.qa.airavatqa.core.APIResult;
 import com.inmobi.qa.airavatqa.core.Brother;
 import com.inmobi.qa.airavatqa.core.ENTITY_TYPE;
@@ -22,11 +22,7 @@ import org.testng.TestNGException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-/**
- *
- * @author rishu.mehrotra
- */
-/*
+
 
 public class ConcurrencyTest {
     

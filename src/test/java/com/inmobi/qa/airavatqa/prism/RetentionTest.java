@@ -89,7 +89,7 @@ public class RetentionTest {
 				Util.assertFailed(prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL,Util.getInputFeedFromBundle(ua2Bundle)));
 			}
 		}
-		catch(Exception e )
+		catch(Exception e)
 		{
 			e.printStackTrace();
 			throw new TestNGException(e.getCause());

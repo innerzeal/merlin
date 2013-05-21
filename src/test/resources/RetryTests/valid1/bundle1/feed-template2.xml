@@ -30,7 +30,7 @@
 
     <clusters>
         <cluster name="corp" type="source">
-            <validity start="2009-01-01T01:00Z" end="2012-12-31T23:59Z"/>
+            <validity start="2009-01-01T01:00Z" end="2099-12-31T23:59Z"/>
             <retention limit="months(6)" action="delete" /> <!-- Limit can be in Time or Instances 100, Action ENUM DELETE,ARCHIVE -->
         </cluster>
     </clusters>

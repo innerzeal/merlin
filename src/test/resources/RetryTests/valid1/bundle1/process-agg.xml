@@ -22,7 +22,7 @@
 	<properties>
 		<property name="queueName" value="default"/>
 	</properties>
-	<workflow path="/examples/apps/aggregator3"/>
+	<workflow path="/examples/apps/aggregator"/>
 	<retry policy="backoff" delay="minutes(10)" attempts="3" />
 
     <late-process policy="exp-backoff" delay="hours(1)">

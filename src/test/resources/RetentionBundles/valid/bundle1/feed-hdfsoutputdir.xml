@@ -7,7 +7,7 @@
     <timezone>UTC</timezone>
     <clusters>
         <cluster name="corp" type="source">
-            <validity start="2012-01-30T00:00Z" end="2013-12-31T23:59Z"></validity>
+            <validity start="2012-01-30T00:00Z" end="2099-12-31T23:59Z"></validity>
             <retention limit="hours(6)" action="delete"></retention>
         </cluster>
     </clusters>

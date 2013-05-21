@@ -4,11 +4,6 @@
  */
 package com.inmobi.qa.airavatqa;
 
-import com.inmobi.qa.airavatqa.core.APIResult;
-import com.inmobi.qa.airavatqa.core.ENTITY_TYPE;
-import com.inmobi.qa.airavatqa.core.EntityHelperFactory;
-import com.inmobi.qa.airavatqa.core.Util;
-import com.inmobi.qa.airavatqa.interfaces.entity.IEntityManagerHelper;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
