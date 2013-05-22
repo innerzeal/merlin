@@ -498,10 +498,9 @@ public class PrismFeedDeleteTest {
     @Test(groups={"prism","0.2"})
     public void testUA1FeedDeleteNonExistentWhen1ColoIsDownDuringDelete() throws Exception
     {
-    	Util u = new Util();
-		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+    	Bundle b1 = (Bundle)Util.readELBundles()[0][0];
 		b1.generateUniqueBundle();
-		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b2 = (Bundle)Util.readELBundles()[0][0];
 		b2.generateUniqueBundle();
 		
 		try{
@@ -1004,10 +1003,9 @@ public class PrismFeedDeleteTest {
     @Test(groups={"prism","0.2"})
         public void testDeleteFeedSuspendedInOneColoWhileAnotherColoIsDown() throws Exception
         {
-        	Util u = new Util();
-    		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+        	Bundle b1 = (Bundle)Util.readELBundles()[0][0];
     		b1.generateUniqueBundle();
-    		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+    		Bundle b2 = (Bundle)Util.readELBundles()[0][0];
     		b2.generateUniqueBundle();
     		
     		try{
@@ -1110,10 +1108,9 @@ public class PrismFeedDeleteTest {
     @Test(enabled=true)
     public void testDeleteFeedSuspendedInOneColoWhileAnotherColoIsDownWithFeedSuspended() throws Exception
     {
-    	Util u = new Util();
-		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+    	Bundle b1 = (Bundle)Util.readELBundles()[0][0];
 		b1.generateUniqueBundle();
-		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b2 = (Bundle)Util.readELBundles()[0][0];
 		b2.generateUniqueBundle();
 		
 		try{

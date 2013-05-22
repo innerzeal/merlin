@@ -128,7 +128,8 @@ public class FeedScheduleTest {
             Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED",ivoryqa1).get(0).contains("SUSPENDED"));
             
             //now schedule this!
-            Util.assertFailed(prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed));
+            Util.assertSucceeded(prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed));
+            Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED",ivoryqa1).get(0).contains("SUSPENDED"));
             
         }
         catch(Exception e)
