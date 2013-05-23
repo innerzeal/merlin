@@ -40,7 +40,7 @@ public class PrismGetTestCase {
 
 	ColoHelper ivoryqa1 = new ColoHelper("ivoryqa-1.config.properties");
 
-	
+	/*
 	
 	@Test
 	public void submitAll_getAllViaPrismAndColo() throws Exception
@@ -76,7 +76,7 @@ public class PrismGetTestCase {
 			Util.print("test print");
 			
 			
-		/*	
+			
 			XMLUnit.setIgnoreWhitespace(true);
 			XMLUnit.setIgnoreAttributeOrder(true);
 			XMLUnit.setIgnoreComments(true);
@@ -86,7 +86,7 @@ public class PrismGetTestCase {
 			String a = xmlUtil.marshalUnmarshalCLuster(r.getMessage());
 			
 			Util.print("from api   : "+a);
-			Util.print("submitted  : "+s);*/
+			Util.print("submitted  : "+s);
 
 			
 
@@ -116,7 +116,7 @@ public class PrismGetTestCase {
 		}
 	}
 	
-	
+	*/
 	@Test
 	public void submitAll_nonSubmitPrismColo() throws Exception
 	{
