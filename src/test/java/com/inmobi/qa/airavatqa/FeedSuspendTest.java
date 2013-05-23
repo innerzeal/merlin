@@ -69,7 +69,7 @@ public class FeedSuspendTest {
         
         Util.assertSucceeded(response);
         
-        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED").get(0).contains("SUSPENDED"));
+        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED",ivoryqa1).get(0).contains("SUSPENDED"));
         }
         catch(Exception e)
         {
@@ -98,13 +98,13 @@ public class FeedSuspendTest {
         response=prismHelper.getFeedHelper().suspend(URLS.SUSPEND_URL, feed);
         Util.assertSucceeded(response);
         
-        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED").get(0).contains("SUSPENDED"));
+        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED", ivoryqa1).get(0).contains("SUSPENDED"));
         
         response=prismHelper.getFeedHelper().suspend(URLS.SUSPEND_URL, feed);
         
         Util.assertSucceeded(response);
         
-        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED").get(0).contains("SUSPENDED"));
+        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"SUSPENDED", ivoryqa1).get(0).contains("SUSPENDED"));
         
         }
                 catch(Exception e)

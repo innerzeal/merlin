@@ -21,7 +21,7 @@
         <property name="jobPriority" value="VERY_HIGH" />
 	<property name="queueName" value="default" />
     </properties>
-    <workflow path="/projects/local-dc/impressionrc-conversion" lib="/projects/local-dc/lib" />
+    <workflow path="/projects/localdc/lda/impressionrc-conversion" lib="/projects/localdc/lda/impressionrc-conversion/lib" />
     <retry policy="exp-backoff" delay="minutes(1)" attempts="3"/>
 </process>
 

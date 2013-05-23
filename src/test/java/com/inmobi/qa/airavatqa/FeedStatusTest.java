@@ -148,7 +148,7 @@ public class FeedStatusTest {
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
         String colo=prismHelper.getFeedHelper().getColo();
         Assert.assertTrue(response.getMessage().contains(colo+"/SUBMITTED"));
-        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"RUNNING",ivoryqa1).get(0).contains("RUNNING"));
+        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"RUNNING",ivoryqa1).get(0).contains("No Jobs match your criteria"));
         }
         catch(Exception e)
         {
@@ -183,7 +183,7 @@ public class FeedStatusTest {
         Assert.assertNotNull(Util.parseResponse(response).getMessage());
         
         Assert.assertTrue(response.getMessage().contains(Util.getFeedName(feed)+" (FEED) not found"));
-        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"KILLED",ivoryqa1).get(0).contains("KILLED"));
+        Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(feed),"KILLED",ivoryqa1).get(0).contains("No Jobs match your criteria"));
         }
         catch(Exception e)
         {
