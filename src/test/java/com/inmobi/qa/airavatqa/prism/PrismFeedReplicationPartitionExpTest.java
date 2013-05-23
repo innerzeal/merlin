@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import org.apache.hadoop.fs.Path;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -39,6 +40,46 @@ public class PrismFeedReplicationPartitionExpTest {
 // ps: partition in source
 	
 	
+	@BeforeClass(alwaysRun=true)
+	public void createTestData() throws Exception{
+		
+		System.out.println("creating test data");
+		
+		hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/00/ua2/");
+		hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/05/ua2/");
+		hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/10/ua2/");
+		hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/15/ua2/");
+
+		hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/00/ua2/"), "feed-s4Replication.xml");
+		hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/05/ua2/"), "log_01.txt");
+		hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/10/ua2/"), "src/main/resources/gs1001.config.properties");
+		hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/15/ua2/"), "src/main/resources/log4testng.properties");
+		
+		hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/00/ua1/");
+		hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/05/ua1/");
+		hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/10/ua1/");
+		hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/15/ua1/");
+		
+		hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/00/ua1/"), "feed-s4Replication.xml");
+		hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/05/ua1/"), "log_01.txt");
+		hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/10/ua1/"), "src/main/resources/gs1001.config.properties");
+		hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/15/ua1/"), "src/main/resources/log4testng.properties");
+		
+		hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/00/ua3/");
+		hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/05/ua3/");
+		hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/10/ua3/");
+		hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/15/ua3/");
+		
+		hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/00/ua3/"), "feed-s4Replication.xml");
+		hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/05/ua3/"), "log_01.txt");
+		hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/10/ua3/"), "src/main/resources/gs1001.config.properties");
+		hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/15/ua3/"), "src/main/resources/log4testng.properties");
+		
+		
+		System.out.println("completed creating test data");
+
+	}
+	
 	@BeforeMethod(alwaysRun=true)
 	public void testName(Method method) throws Exception
 	{
@@ -50,31 +91,22 @@ public class PrismFeedReplicationPartitionExpTest {
 	}
 	
 	
+	
 	@Test(enabled=true)
-	public void normalTest_1s1t1n_ps() throws Exception{
+	public void blankPartition() throws Exception{
 		//this test is for ideal condition when data is present in all the required places and replication takes place normally
-
-		// there are 1 source clusters 10.14.110.46
-		//10.14.118.26 is the target
-		//data should be replicated to 10.14.118.26 from 46
+		//partition is left blank
 		
-		// path for data in target cluster should also be customized
-
-		Util u = new Util();
-		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b1 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b1.generateUniqueBundle();
-		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b2 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b2.generateUniqueBundle();
-		Bundle b3 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b3 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b3.generateUniqueBundle();
-
 		try{
 			b1 = new Bundle(b1,ua1.getEnvFileName());
 			b2  = new Bundle(b2,ua2.getEnvFileName());
 			b3  = new Bundle(b3,ua3.getEnvFileName());
-			
-			
-
 			
 			b1.setCLusterColo("ua1");
 			Util.print("cluster b1: "+b1.getClusters().get(0));
@@ -94,16 +126,74 @@ public class PrismFeedReplicationPartitionExpTest {
 			r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b3.getClusters().get(0));
 			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
 
-			String startTimeUA1 = "2012-10-01T12:00Z" ;
-			String startTimeUA2 = "2012-10-01T12:00Z";
+			String startTimeUA1 = "2012-10-01T12:05Z" ;
+			String startTimeUA2 = "2012-10-01T12:10Z";
 			
 
 			String feed = b1.getDataSets().get(0);
 			feed =  instanceUtil.setFeedCluster(feed,xmlUtil.createValidity("2012-10-01T12:00Z","2010-01-01T00:00Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),null,ClusterType.SOURCE,null,null);
 		
-			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTimeUA1,"2099-10-01T12:10Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b1.getClusters().get(0)),null,null,null);
-			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTimeUA2,"2099-10-01T12:25Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b2.getClusters().get(0)),ClusterType.TARGET,null,"/clusterPath/localDC/rc/billing/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
-			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity("2012-10-01T12:00Z","2099-01-01T00:00Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b3.getClusters().get(0)),ClusterType.SOURCE,"${cluster.colo}","/localDC/rc/billing/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTimeUA1,"2012-10-01T12:10Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b1.getClusters().get(0)),ClusterType.SOURCE,"","/localDC/rc/billing/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTimeUA2,"2012-10-01T12:25Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b2.getClusters().get(0)),ClusterType.TARGET,"","/clusterPath/localDC/rc/billing/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity("2012-10-01T12:00Z","2099-01-01T00:00Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b3.getClusters().get(0)),ClusterType.SOURCE,"",null);
+
+			//clean target if old data exists
+			String prefix = "/data/fetlrc/billing/2012/10/01/12/";
+			Util.HDFSCleanup(ua1,prefix.substring(1));
+			Util.HDFSCleanup(ua2,prefix.substring(1));
+
+			
+			Util.print("feed: "+feed);
+
+			r= prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
+			Thread.sleep(10000);
+			AssertUtil.assertFailed(r, "submit of feed should have fialed as the partiton in source is blank");
+		
+		}
+
+		finally{
+			
+			prismHelper.getFeedHelper().delete(URLS.DELETE_URL, b1.getDataSets().get(0));
+			prismHelper.getClusterHelper().delete(URLS.DELETE_URL, b2.getClusters().get(0));
+			prismHelper.getClusterHelper().delete(URLS.DELETE_URL, b1.getClusters().get(0));
+			prismHelper.getClusterHelper().delete(URLS.DELETE_URL, b3.getClusters().get(0));
+		}
+	}
+	
+	
+	@Test(enabled=true)
+	public void normalTest_1s1t1n_ps() throws Exception{
+		//this test is for ideal condition when data is present in all the required places and replication takes place normally
+
+		// there are 1 source clusters 10.14.110.46
+		//10.14.118.26 is the target
+		//data should be replicated to 10.14.118.26 from 46
+		
+		// path for data in target cluster should also be customized
+
+		Bundle b1 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
+		b1.generateUniqueBundle();
+		Bundle b2 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
+		b2.generateUniqueBundle();
+		Bundle b3 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
+		b3.generateUniqueBundle();
+
+		try{
+			b1 = new Bundle(b1,ua1.getEnvFileName());
+			b2  = new Bundle(b2,ua2.getEnvFileName());
+			b3  = new Bundle(b3,ua3.getEnvFileName());
+			
+			Bundle.submitCluster(b1,b2,b3);
+			String startTimeUA1 = "2012-10-01T12:00Z" ;
+			String startTimeUA2 = "2012-10-01T12:00Z";
+			
+
+			String feed = b1.getDataSets().get(0);
+			feed =  instanceUtil.setFeedCluster(feed,xmlUtil.createValidity("2012-10-01T12:00Z","2010-01-01T00:00Z"),xmlUtil.createRtention("days(100000)",ActionType.DELETE),null,ClusterType.SOURCE,null,null);
+		
+			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTimeUA1,"2099-10-01T12:10Z"),xmlUtil.createRtention("days(100000)",ActionType.DELETE),Util.readClusterName(b1.getClusters().get(0)),null,null,null);
+			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTimeUA2,"2099-10-01T12:25Z"),xmlUtil.createRtention("days(100000)",ActionType.DELETE),Util.readClusterName(b2.getClusters().get(0)),ClusterType.TARGET,null,"/clusterPath/localDC/rc/billing/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
+			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity("2012-10-01T12:00Z","2099-01-01T00:00Z"),xmlUtil.createRtention("days(100000)",ActionType.DELETE),Util.readClusterName(b3.getClusters().get(0)),ClusterType.SOURCE,"${cluster.colo}","/localDC/rc/billing/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
 	
 			
 			//clean target if old data exists
@@ -113,7 +203,7 @@ public class PrismFeedReplicationPartitionExpTest {
 			
 			Util.print("feed: "+feed);
 
-			r= prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
+			ServiceResponse r = prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
 			Thread.sleep(10000);
 			AssertUtil.assertSucceeded(r);
 
@@ -121,7 +211,14 @@ public class PrismFeedReplicationPartitionExpTest {
 			AssertUtil.assertSucceeded(r);
 			Thread.sleep(15000);
 			
-			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),2, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
+			hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/00/ua3/");
+			hadoopUtil.createDir(ua3, "/localDC/rc/billing/2012/10/01/12/05/ua3/");
+			
+			hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/00/ua3/"), "feed-s4Replication.xml");
+			hadoopUtil.copyDataToFolder(ua3,new Path("/localDC/rc/billing/2012/10/01/12/05/ua3/"), "log_01.txt");
+
+			
+			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),2, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 7,ENTITY_TYPE.FEED);
 			
 			Assert.assertEquals(instanceUtil.checkIfFeedCoordExist(ua2.getFeedHelper(),Util.readDatasetName(feed),"REPLICATION"),1);
 			Assert.assertEquals(instanceUtil.checkIfFeedCoordExist(ua2.getFeedHelper(),Util.readDatasetName(feed),"RETENTION"),1);
@@ -178,12 +275,11 @@ public class PrismFeedReplicationPartitionExpTest {
 		
 		// path for data in target cluster should also be customized
 
-		Util u = new Util();
-		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b1 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b1.generateUniqueBundle();
-		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b2 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b2.generateUniqueBundle();
-		Bundle b3 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b3 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b3.generateUniqueBundle();
 
 		try{
@@ -191,26 +287,7 @@ public class PrismFeedReplicationPartitionExpTest {
 			b2  = new Bundle(b2,ua2.getEnvFileName());
 			b3  = new Bundle(b3,ua3.getEnvFileName());
 			
-			
-
-			
-			b1.setCLusterColo("ua1");
-			Util.print("cluster b1: "+b1.getClusters().get(0));
-
-			ServiceResponse r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b1.getClusters().get(0));
-			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
-
-
-			b2.setCLusterColo("ua2");
-			Util.print("cluster b2: "+b2.getClusters().get(0));
-			r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b2.getClusters().get(0));
-			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
-
-
-			b3.setCLusterColo("ua3");
-			Util.print("cluster b3: "+b3.getClusters().get(0));
-			r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b3.getClusters().get(0));
-			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
+			Bundle.submitCluster(b1,b2,b3);
 
 			String startTimeUA1 = "2012-10-01T12:00Z" ;
 			String startTimeUA2 = "2012-10-01T12:00Z";
@@ -231,15 +308,18 @@ public class PrismFeedReplicationPartitionExpTest {
 			
 			Util.print("feed: "+feed);
 
-			r= prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
+			ServiceResponse r = prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL, feed);
 			Thread.sleep(10000);
 			AssertUtil.assertSucceeded(r);
 
-			r= prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed);
+/*			r= prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed);
 			AssertUtil.assertSucceeded(r);
-			Thread.sleep(15000);
+			Thread.sleep(15000);*/
 			
-			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),2, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
+			
+			
+			
+			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),2, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 7,ENTITY_TYPE.FEED);
 			
 			Assert.assertEquals(instanceUtil.checkIfFeedCoordExist(ua2.getFeedHelper(),Util.readDatasetName(feed),"REPLICATION"),1);
 			Assert.assertEquals(instanceUtil.checkIfFeedCoordExist(ua2.getFeedHelper(),Util.readDatasetName(feed),"RETENTION"),1);
@@ -294,12 +374,11 @@ public class PrismFeedReplicationPartitionExpTest {
 		//data should be replicated to folder on 10.14.117.33 and 10.14.118.26 as targets 
 		//ua3 is the source and ua1 and ua2 are target
 
-		Util u = new Util();
-		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b1 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b1.generateUniqueBundle();
-		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b2 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b2.generateUniqueBundle();
-		Bundle b3 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b3 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b3.generateUniqueBundle();
 
 		try{
@@ -354,8 +433,8 @@ public class PrismFeedReplicationPartitionExpTest {
 			r= prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed);
 			Thread.sleep(15000);
 			
-			instanceUtil.waitTillInstanceReachState(ua1,Util.getFeedName(feed),1, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
-			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),3, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
+			instanceUtil.waitTillInstanceReachState(ua1,Util.getFeedName(feed),1, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 7,ENTITY_TYPE.FEED);
+			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),3, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 7,ENTITY_TYPE.FEED);
 
 			//check if data has been replicated correctly
 			
@@ -412,12 +491,11 @@ public class PrismFeedReplicationPartitionExpTest {
 		//data should be replicated to 10.14.118.26 from ua2 sub dir of 46 and 33
 		// source cluster path in 33 should be mentioned in cluster definition 
 		// path for data in target cluster should also be customized
-		Util u = new Util();
-		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b1 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b1.generateUniqueBundle();
-		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b2 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b2.generateUniqueBundle();
-		Bundle b3 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b3 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b3.generateUniqueBundle();
 
 		try{
@@ -473,8 +551,8 @@ public class PrismFeedReplicationPartitionExpTest {
 			AssertUtil.assertSucceeded(r);
 			Thread.sleep(15000);
 			
-			instanceUtil.waitTillInstanceReachState(ua1,Util.getFeedName(feed),1, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
-			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),3, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
+			instanceUtil.waitTillInstanceReachState(ua1,Util.getFeedName(feed),1, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 7,ENTITY_TYPE.FEED);
+			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),3, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 7,ENTITY_TYPE.FEED);
 
 			//check if data has been replicated correctly
 			
@@ -533,12 +611,11 @@ public class PrismFeedReplicationPartitionExpTest {
 		//data should be replicated to folder on 10.14.117.33 and 10.14.118.26 as targets 
 		//ua3 is the source and ua1 and ua2 are target
 
-		Util u = new Util();
-		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b1 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b1.generateUniqueBundle();
-		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b2 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b2.generateUniqueBundle();
-		Bundle b3 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b3 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b3.generateUniqueBundle();
 
 		try{
@@ -546,25 +623,7 @@ public class PrismFeedReplicationPartitionExpTest {
 			b2  = new Bundle(b2,ua2.getEnvFileName());
 			b3  = new Bundle(b3,ua3.getEnvFileName());
 			
-			
-
-			
-			b1.setCLusterColo("ua1");
-			Util.print("cluster b1: "+b1.getClusters().get(0));
-			ServiceResponse r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b1.getClusters().get(0));
-			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
-
-
-			b2.setCLusterColo("ua2");
-			Util.print("cluster b2: "+b2.getClusters().get(0));
-			r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b2.getClusters().get(0));
-			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
-
-
-			b3.setCLusterColo("ua3");
-			Util.print("cluster b3: "+b3.getClusters().get(0));
-			r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b3.getClusters().get(0));
-			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
+			Bundle.submitCluster(b1,b2,b3);
 
 			String startTimeUA1 = "2012-10-01T12:05Z" ;
 			String startTimeUA2 = "2012-10-01T12:10Z";
@@ -588,15 +647,15 @@ public class PrismFeedReplicationPartitionExpTest {
 			
 			Util.print("feed: "+feed);
 
-			r= prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
+			ServiceResponse r = prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
 			Thread.sleep(10000);
 			AssertUtil.assertSucceeded(r);
 
 			r= prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed);
 			Thread.sleep(15000);
 			
-			instanceUtil.waitTillInstanceReachState(ua1,Util.getFeedName(feed),1, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
-			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),3, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
+			instanceUtil.waitTillInstanceReachState(ua1,Util.getFeedName(feed),1, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 7,ENTITY_TYPE.FEED);
+			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),3, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 7,ENTITY_TYPE.FEED);
 
 			//check if data has been replicated correctly
 			
@@ -656,12 +715,11 @@ public class PrismFeedReplicationPartitionExpTest {
 		//data should be replicated to 10.14.118.26 from ua2 sub dir of 46 and 33
 		// source cluster path in 33 should be mentioned in cluster definition 
 		// path for data in target cluster should also be customized
-		Util u = new Util();
-		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b1 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b1.generateUniqueBundle();
-		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b2 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b2.generateUniqueBundle();
-		Bundle b3 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b3 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b3.generateUniqueBundle();
 
 		try{
@@ -716,7 +774,7 @@ public class PrismFeedReplicationPartitionExpTest {
 			AssertUtil.assertSucceeded(r);
 			Thread.sleep(15000);
 			
-			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),2, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
+			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),2, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 7,ENTITY_TYPE.FEED);
 
 			//check if data has been replicated correctly
 			
@@ -768,12 +826,11 @@ public class PrismFeedReplicationPartitionExpTest {
 		//data should be replicated to folder on 10.14.117.33 and 10.14.118.26 as targets 
 		//ua3 is the source and ua1 and ua2 are target
 
-		Util u = new Util();
-		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b1 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b1.generateUniqueBundle();
-		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b2 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b2.generateUniqueBundle();
-		Bundle b3 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b3 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b3.generateUniqueBundle();
 
 		try{
@@ -830,8 +887,8 @@ public class PrismFeedReplicationPartitionExpTest {
 			r= prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed);
 			Thread.sleep(15000);
 			
-			instanceUtil.waitTillInstanceReachState(ua1,Util.getFeedName(feed),1, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
-			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),3, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 20,ENTITY_TYPE.FEED);
+			instanceUtil.waitTillInstanceReachState(ua1,Util.getFeedName(feed),1, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 7,ENTITY_TYPE.FEED);
+			instanceUtil.waitTillInstanceReachState(ua2,Util.getFeedName(feed),3, org.apache.oozie.client.CoordinatorAction.Status.SUCCEEDED, 7,ENTITY_TYPE.FEED);
 
 			//check if data has been replicated correctly
 			
@@ -903,78 +960,7 @@ public class PrismFeedReplicationPartitionExpTest {
 		
 	}
 	
-	@Test(enabled=true)
-	public void blankPartition() throws Exception{
-		//this test is for ideal condition when data is present in all the required places and replication takes place normally
-		//partition is left blank
-		
-		Util u = new Util();
-		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
-		b1.generateUniqueBundle();
-		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
-		b2.generateUniqueBundle();
-		Bundle b3 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
-		b3.generateUniqueBundle();
-		try{
-			b1 = new Bundle(b1,ua1.getEnvFileName());
-			b2  = new Bundle(b2,ua2.getEnvFileName());
-			b3  = new Bundle(b3,ua3.getEnvFileName());
-			
-			
 
-			
-			b1.setCLusterColo("ua1");
-			Util.print("cluster b1: "+b1.getClusters().get(0));
-
-			ServiceResponse r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b1.getClusters().get(0));
-			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
-
-
-			b2.setCLusterColo("ua2");
-			Util.print("cluster b2: "+b2.getClusters().get(0));
-			r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b2.getClusters().get(0));
-			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
-
-
-			b3.setCLusterColo("ua3");
-			Util.print("cluster b3: "+b3.getClusters().get(0));
-			r = prismHelper.getClusterHelper().submitEntity(URLS.SUBMIT_URL,b3.getClusters().get(0));
-			Assert.assertTrue(r.getMessage().contains("SUCCEEDED"));
-
-			String startTimeUA1 = "2012-10-01T12:05Z" ;
-			String startTimeUA2 = "2012-10-01T12:10Z";
-			
-
-			String feed = b1.getDataSets().get(0);
-			feed =  instanceUtil.setFeedCluster(feed,xmlUtil.createValidity("2012-10-01T12:00Z","2010-01-01T00:00Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),null,ClusterType.SOURCE,null,null);
-		
-			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTimeUA1,"2012-10-01T12:10Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b1.getClusters().get(0)),ClusterType.SOURCE,"","/localDC/rc/billing/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
-			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity(startTimeUA2,"2012-10-01T12:25Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b2.getClusters().get(0)),ClusterType.TARGET,"","/clusterPath/localDC/rc/billing/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}");
-			feed = instanceUtil.setFeedCluster(feed,xmlUtil.createValidity("2012-10-01T12:00Z","2099-01-01T00:00Z"),xmlUtil.createRtention("days(10000)",ActionType.DELETE),Util.readClusterName(b3.getClusters().get(0)),ClusterType.SOURCE,"",null);
-
-			//clean target if old data exists
-			String prefix = "/data/fetlrc/billing/2012/10/01/12/";
-			Util.HDFSCleanup(ua1,prefix.substring(1));
-			Util.HDFSCleanup(ua2,prefix.substring(1));
-
-			
-			Util.print("feed: "+feed);
-
-			r= prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL, feed);
-			Thread.sleep(10000);
-			AssertUtil.assertFailed(r, "submit of feed should have fialed as the partiton in source is blank");
-		
-		}
-
-		finally{
-			
-			prismHelper.getFeedHelper().delete(URLS.DELETE_URL, b1.getDataSets().get(0));
-			prismHelper.getClusterHelper().delete(URLS.DELETE_URL, b2.getClusters().get(0));
-			prismHelper.getClusterHelper().delete(URLS.DELETE_URL, b1.getClusters().get(0));
-			prismHelper.getClusterHelper().delete(URLS.DELETE_URL, b3.getClusters().get(0));
-		}
-	}
-	
 	@Test(enabled=false)
 	public void noDataInBaseDir() throws Exception{
 		
@@ -987,12 +973,11 @@ public class PrismFeedReplicationPartitionExpTest {
 	
 	@Test(enabled=true)
 	public void moreThanOneClusterWithSameNameDiffValidity() throws Exception{
-		Util u = new Util();
-		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b1 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b1.generateUniqueBundle();
-		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b2 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b2.generateUniqueBundle();
-		Bundle b3 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+		Bundle b3 = (Bundle)Bundle.readBundle("src/test/resources/LocalDC_feedReplicaltion_BillingRC")[0][0];
 		b3.generateUniqueBundle();
 		try{
 			b1 = new Bundle(b1,ua1.getEnvFileName());
