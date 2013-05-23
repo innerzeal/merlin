@@ -242,7 +242,7 @@ public class PrismFeedSnSTest {
             
             Util.shutDownService(UA1ColoHelper.getFeedHelper());
             
-            Util.assertSucceeded(prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL,UA1Bundle.getDataSets().get(0)));
+            Util.assertFailed(prismHelper.getFeedHelper().submitAndSchedule(URLS.SUBMIT_AND_SCHEDULE_URL,UA1Bundle.getDataSets().get(0)));
             Assert.assertEquals(Util.getOozieJobStatus(Util.readDatasetName(UA1Bundle.getDataSets().get(0)),"RUNNING",UA2ColoHelper).get(0),"No Jobs match your criteria!");
             }
             catch(Exception e)
@@ -467,10 +467,9 @@ public class PrismFeedSnSTest {
        @Test(groups={"prism","0.2"})
         public void testFeedSnSOn1ColoWhileThatColoIsDownUsingColoHelper() throws Exception
         {
-        	Util u = new Util();
-    		Bundle b1 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+        	Bundle b1 = (Bundle)Util.readELBundles()[0][0];
     		b1.generateUniqueBundle();
-    		Bundle b2 = (Bundle)u.readBundle(GetBundle.BillingFeedReplicationBundle)[0][0];
+    		Bundle b2 = (Bundle)Util.readELBundles()[0][0];
     		b2.generateUniqueBundle();
     		
     		try{
@@ -501,10 +500,10 @@ public class PrismFeedSnSTest {
     			Util.shutDownService(UA1ColoHelper.getFeedHelper());
     	        
     			ServiceResponse response=prismHelper.getFeedHelper().submitEntity(URLS.SUBMIT_URL,feed);
-    			//Util.assertPartialSucceeded(response);
-    			Util.assertSucceeded(response);
+    			Util.assertPartialSucceeded(response);
+    			//Util.assertSucceeded(response);
     			response=prismHelper.getFeedHelper().schedule(URLS.SCHEDULE_URL, feed);
-    			Util.assertSucceeded(response);
+    			Util.assertPartialSucceeded(response);
     		
     		}
             catch(Exception e)

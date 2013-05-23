@@ -153,7 +153,7 @@ public class PrismFeedSuspendTest {
             Util.shutDownService(UA1ColoHelper.getFeedHelper());
 
             //suspend using prismHelper
-            Util.assertSucceeded(prismHelper.getFeedHelper().suspend(Util.URLS.SUSPEND_URL, UA1Bundle.getDataSets().get(0)));
+            Util.assertFailed(prismHelper.getFeedHelper().suspend(Util.URLS.SUSPEND_URL, UA1Bundle.getDataSets().get(0)));
             //verify
             Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(UA2Bundle.getDataSets().get(0)), "RUNNING", UA2ColoHelper).get(0).contains("RUNNING"));
 
@@ -232,10 +232,11 @@ public class PrismFeedSuspendTest {
 
             Util.shutDownService(UA1ColoHelper.getFeedHelper());
 
-            Util.assertSucceeded(prismHelper.getFeedHelper().suspend(Util.URLS.SUSPEND_URL, UA1Bundle.getDataSets().get(0)));
+            Util.assertFailed(prismHelper.getFeedHelper().suspend(Util.URLS.SUSPEND_URL, UA1Bundle.getDataSets().get(0)));
 
 
-            for (int i = 0; i < 2; i++) {
+            //for (int i = 0; i < 2; i++) 
+            {
                 //suspend on the other one
                 Util.assertSucceeded(prismHelper.getFeedHelper().suspend(Util.URLS.SUSPEND_URL, UA2Bundle.getDataSets().get(0)));
                 Assert.assertTrue(Util.getOozieFeedJobStatus(Util.readDatasetName(UA1Bundle.getDataSets().get(0)), "SUSPENDED", UA1ColoHelper).get(0).contains("SUSPENDED"));
